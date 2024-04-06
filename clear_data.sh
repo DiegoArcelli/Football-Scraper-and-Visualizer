@@ -1,0 +1,23 @@
+rm ./datasets/2023-2024/*.csv
+rm ./datasets/2023-2024/Serie-A/*.csv
+rm ./datasets/2023-2024/La-Liga/*.csv
+rm ./datasets/2023-2024/Ligue-1/*.csv
+rm ./datasets/2023-2024/Bundesliga/*.csv
+rm ./datasets/2023-2024/All-Competitions/Premier-League/*.csv
+rm ./datasets/2023-2024/All-Competitions/Serie-A/*.csv
+rm ./datasets/2023-2024/All-Competitions/La-Liga/*.csv
+rm ./datasets/2023-2024/All-Competitions/Ligue-1/*.csv
+rm ./datasets/2023-2024/All-Competitions/Bundesliga/*.csv
+rm ./datasets/2023-2024/All-Competitions/*.csv
+
+rm ./datasets/2022-2023/*.csv
+rm ./datasets/2022-2023/Serie-A/*.csv
+rm ./datasets/2022-2023/La-Liga/*.csv
+rm ./datasets/2022-2023/Ligue-1/*.csv
+rm ./datasets/2022-2023/Bundesliga/*.csv
+rm ./datasets/2022-2023/All-Competitions/Premier-League/*.csv
+rm ./datasets/2022-2023/All-Competitions/Serie-A/*.csv
+rm ./datasets/2022-2023/All-Competitions/La-Liga/*.csv
+rm ./datasets/2022-2023/All-Competitions/Ligue-1/*.csv
+rm ./datasets/2022-2023/All-Competitions/Bundesliga/*.csv
+rm ./datasets/2022-2023/All-Competitions/*.csv

@@ -1,0 +1,417 @@
+<svg class="Opta-Responsive-Svg Opta-selectable-area" preserveAspectRatio="xMidYMid meet" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 843.2 552.8"><g class="Opta-Field" transform="translate(20.8,12.8)"><g class="Opta-Markings"><rect y="0" x="0" width="800" height="524"></rect><line x1="400" y1="524" x2="400" y2="0"></line><circle cx="400" cy="262" r="69.71677559912854"></circle><circle cx="400" cy="262" r="2"></circle><circle cx="92" cy="262" class="Opta-Spot" r="2"></circle><circle cx="708" cy="262" class="Opta-Spot" r="2"></circle><path d="M0,413.43600000000004L136,413.43600000000004L136,110.56399999999996L0,110.56399999999996"></path><path d="M800,413.43600000000004L664,413.43600000000004L664,110.56399999999996L800,110.56399999999996"></path><path d="M0,331.168L46.4,331.168L46.4,192.832L0,192.832"></path><path d="M800,331.168L753.6,331.168L753.6,192.832L800,192.832"></path><path d="M0,287.152L-12,287.152L-12,236.848L0,236.848"></path><path d="M800,287.152L811.9999999999999,287.152L811.9999999999999,236.848L800,236.848"></path><path d="M5.763043760693427e-16,-9.411764705882353A9.411764705882353,9.411764705882353 0 0,1 9.411764705882353,0L9.411764705882353,0A9.411764705882353,9.411764705882353 0 0,0 5.763043760693427e-16,-9.411764705882353Z" transform="translate(0,524)"></path><path d="M9.411764705882353,0A9.411764705882353,9.411764705882353 0 0,1 5.763043760693427e-16,9.411764705882353L5.763043760693427e-16,9.411764705882353A9.411764705882353,9.411764705882353 0 0,0 9.411764705882353,0Z" transform="translate(0,0)"></path><path d="M5.763043760693427e-16,9.411764705882353A9.411764705882353,9.411764705882353 0 0,1 -9.411764705882353,1.1526087521386854e-15L-9.411764705882353,1.1526087521386854e-15A9.411764705882353,9.411764705882353 0 0,0 5.763043760693427e-16,9.411764705882353Z" transform="translate(800,0)"></path><path d="M-9.411764705882353,1.1526087521386854e-15A9.411764705882353,9.411764705882353 0 0,1 -1.728913128208028e-15,-9.411764705882353L-1.728913128208028e-15,-9.411764705882353A9.411764705882353,9.411764705882353 0 0,0 -9.411764705882353,1.1526087521386854e-15Z" transform="translate(800,524)"></path><path d="M44.43914525481061,-53.71769884275655A69.71677559912854,69.71677559912854 0 0,1 44.43914525481062,53.71769884275654L44.43914525481062,53.71769884275654A69.71677559912854,69.71677559912854 0 0,0 44.43914525481061,-53.71769884275655Z" transform="translate(92,262)"></path><path d="M-44.43914525481061,53.71769884275655A69.71677559912854,69.71677559912854 0 0,1 -44.4391452548106,-53.717698842756555L-44.4391452548106,-53.717698842756555A69.71677559912854,69.71677559912854 0 0,0 -44.43914525481061,53.71769884275655Z" transform="translate(708,262)"></path></g></g><g class="Opta-selection-layer"><rect class="Opta-selection-box" x="546.634881237047" y="167.13776452908755" width="280.22891612841727" height="281.495182364779"></rect></g><g class="Opta-selection-layer"><rect class="Opta-selection-box" x="0" y="0" width="0" height="0"></rect></g><g class="Opta-events-layer"><rect x="0" y="0" width="838.4" height="549.5999999999999"></rect><line x1="674.6906624" y1="189.677952" x2="786.4326143999999" y2="260.4356544" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(674.6906624,189.677952)" class="Opta-Player Opta-Player-8mcf8c8ht32as6xxrf1gb51m2 Opta-Home  Opta-Positive Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-91" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-91"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">21</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots on target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            11‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          A. Adli
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="179.0352896" y1="234.89903999999999" x2="21.7984" y2="282.24817920000004" marker-end="url(#Opta_3_svg_arrowhead_Negative)" class="Opta-Arrow Opta-Negative"></line><g transform="translate(179.0352896,234.89903999999999)" class="Opta-Player Opta-Player-4w4ldzomkj7fhrc51iimz8no5 Opta-Away  Opta-Negative Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-183" data-id="6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-183"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">8</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots off target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            13‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          L. Goretzka
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-apoawtpvac4zqlancmvw4nk4o Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=apoawtpvac4zqlancmvw4nk4o" alt="FC Bayern München" class=" Opta-Image-Team-Small"></span>
+          FC Bayern München
+        </p>
+      </div></text></g><line x1="766.4786944" y1="330.661344" x2="819.9552" y2="276.3960384" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(766.4786944,330.661344)" class="Opta-Player Opta-Player-4skrm2y64va3y5jk70gz4ylpm Opta-Home  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-172" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-172"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">2</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Goals
+          </span>
+          <span class="Opta-Tooltip-Value">
+            18‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          J. Stanišić
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="766.4786944" y1="330.661344" x2="819.9552" y2="276.3960384" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(766.4786944,330.661344)" class="Opta-Player Opta-Player-4skrm2y64va3y5jk70gz4ylpm Opta-Home  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-172" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-172"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">2</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Goals
+          </span>
+          <span class="Opta-Tooltip-Value">
+            18‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          J. Stanišić
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="740.9376768" y1="354.60192" x2="805.5883776" y2="289.16434560000005" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(740.9376768,354.60192)" class="Opta-Player Opta-Player-dt8k9pwcj3zktd8xk3ai98vyt Opta-Home  Opta-Positive Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-216" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-216"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">19</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots on target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            23‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          N. Tella
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="695.4427392" y1="326.4052416" x2="714.5985024" y2="318.9570624" marker-end="url(#Opta_3_svg_arrowhead_Neutral)" class="Opta-Arrow Opta-Neutral"></line><g transform="translate(695.4427392,326.4052416)" class="Opta-Player Opta-Player-2k5g68ywtr79lc45wozvifqlm Opta-Home  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-217" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-217"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">10</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Blocks
+          </span>
+          <span class="Opta-Tooltip-Value">
+            23‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          F. Wirtz
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="756.9008127999999" y1="250.32741119999997" x2="805.5883776" y2="272.13993600000003" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(756.9008127999999,250.32741119999997)" class="Opta-Player Opta-Player-5ec2ede9uwbft3wby33mwowyd Opta-Home  Opta-Positive Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-221" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-221"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">4</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots on target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            23‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          J. Tah
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="780.8455167999999" y1="222.1307328" x2="792.0197119999999" y2="247.13533439999995" marker-end="url(#Opta_3_svg_arrowhead_Neutral)" class="Opta-Arrow Opta-Neutral"></line><g transform="translate(780.8455167999999,222.1307328)" class="Opta-Player Opta-Player-4tev0kk0om8cr1xbwpt8bozit Opta-Home  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-224" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-224"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">8</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Blocks
+          </span>
+          <span class="Opta-Tooltip-Value">
+            24‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          R. Andrich
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="170.25556479999995" y1="154.56510719999997" x2="29.779968" y2="263.0957184" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(170.25556479999995,154.56510719999997)" class="Opta-Player Opta-Player-7vhnftizqlyu31st2vsmgh6tx Opta-Away  Opta-Positive Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-314" data-id="6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-314"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">40</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots on target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            27‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          N. Mazraoui
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-apoawtpvac4zqlancmvw4nk4o Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=apoawtpvac4zqlancmvw4nk4o" alt="FC Bayern München" class=" Opta-Image-Team-Small"></span>
+          FC Bayern München
+        </p>
+      </div></text></g><line x1="617.2233728" y1="310.44485760000003" x2="732.157952" y2="260.4356544" marker-end="url(#Opta_3_svg_arrowhead_Negative)" class="Opta-Arrow Opta-Negative"></line><g transform="translate(617.2233728,310.44485760000003)" class="Opta-Player Opta-Player-6264xjr1y00yu7b9j2pknalzp Opta-Home  Opta-Negative Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-322" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-322"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">34</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots off target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            37‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          G. Xhaka
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="741.7358336" y1="283.84421760000004" x2="812.7717888" y2="276.9280512" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(741.7358336,283.84421760000004)" class="Opta-Player Opta-Player-8mcf8c8ht32as6xxrf1gb51m2 Opta-Home  Opta-Positive Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-324" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-324"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">21</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots on target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            37‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          A. Adli
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="639.5717632" y1="194.99808" x2="819.9552" y2="280.65214080000004" marker-end="url(#Opta_3_svg_arrowhead_Negative)" class="Opta-Arrow Opta-Negative"></line><g transform="translate(639.5717632,194.99808)" class="Opta-Player Opta-Player-4foax2b7unlkev1eq6py86lii Opta-Home  Opta-Negative Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-375" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-375"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">3</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots off target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            41‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          P. Hincapié
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="87.24725760000003" y1="190.2099648" x2="21.7984" y2="221.59872" marker-end="url(#Opta_3_svg_arrowhead_Negative)" class="Opta-Arrow Opta-Negative"></line><g transform="translate(87.24725760000003,190.2099648)" class="Opta-Player Opta-Player-4603xrdk721lqhd1ejn62x5n9 Opta-Away  Opta-Negative Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-473" data-id="6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-473"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">10</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots off target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            43‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          L. Sané
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-apoawtpvac4zqlancmvw4nk4o Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=apoawtpvac4zqlancmvw4nk4o" alt="FC Bayern München" class=" Opta-Image-Team-Small"></span>
+          FC Bayern München
+        </p>
+      </div></text></g><line x1="774.4602623999999" y1="187.54990079999996" x2="819.9552" y2="259.9036416" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(774.4602623999999,187.54990079999996)" class="Opta-Player Opta-Player-12f4mz064elnxecq2srl7r6j9 Opta-Home  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-455" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-455"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">20</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Goals
+          </span>
+          <span class="Opta-Tooltip-Value">
+            50‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          Álex Grimaldo
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="774.4602623999999" y1="187.54990079999996" x2="819.9552" y2="259.9036416" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(774.4602623999999,187.54990079999996)" class="Opta-Player Opta-Player-12f4mz064elnxecq2srl7r6j9 Opta-Home  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-455" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-455"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">20</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Goals
+          </span>
+          <span class="Opta-Tooltip-Value">
+            50‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          Álex Grimaldo
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="80.06384639999997" y1="298.74057600000003" x2="21.7984" y2="306.720768" marker-end="url(#Opta_3_svg_arrowhead_Negative)" class="Opta-Arrow Opta-Negative"></line><g transform="translate(80.06384639999997,298.74057600000003)" class="Opta-Player Opta-Player-70esd7csbds20h5uazwktcbje Opta-Away  Opta-Negative Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-598" data-id="6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-598"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">23</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots off target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            52‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          S. Boey
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-apoawtpvac4zqlancmvw4nk4o Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=apoawtpvac4zqlancmvw4nk4o" alt="FC Bayern München" class=" Opta-Image-Team-Small"></span>
+          FC Bayern München
+        </p>
+      </div></text></g><line x1="728.9653248" y1="408.8672256" x2="811.973632" y2="296.08051200000006" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(728.9653248,408.8672256)" class="Opta-Player Opta-Player-dt8k9pwcj3zktd8xk3ai98vyt Opta-Home  Opta-Positive Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-551" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-551"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">19</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots on target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            59‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          N. Tella
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="49.73388800000001" y1="185.95386239999996" x2="44.14679039999998" y2="198.1901568" marker-end="url(#Opta_3_svg_arrowhead_Neutral)" class="Opta-Arrow Opta-Neutral"></line><g transform="translate(49.73388800000001,185.95386239999996)" class="Opta-Player Opta-Player-4w4ldzomkj7fhrc51iimz8no5 Opta-Away  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-748" data-id="6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-748"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">8</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Blocks
+          </span>
+          <span class="Opta-Tooltip-Value">
+            67‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          L. Goretzka
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-apoawtpvac4zqlancmvw4nk4o Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=apoawtpvac4zqlancmvw4nk4o" alt="FC Bayern München" class=" Opta-Image-Team-Small"></span>
+          FC Bayern München
+        </p>
+      </div></text></g><line x1="177.43897600000003" y1="308.8488192" x2="113.586432" y2="291.8244096" marker-end="url(#Opta_3_svg_arrowhead_Neutral)" class="Opta-Arrow Opta-Neutral"></line><g transform="translate(177.43897600000003,308.8488192)" class="Opta-Player Opta-Player-bhsdzppop8jwjsxwftizot1t6 Opta-Away  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-798" data-id="6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-798"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">42</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Blocks
+          </span>
+          <span class="Opta-Tooltip-Value">
+            70‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          J. Musiala
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-apoawtpvac4zqlancmvw4nk4o Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=apoawtpvac4zqlancmvw4nk4o" alt="FC Bayern München" class=" Opta-Image-Team-Small"></span>
+          FC Bayern München
+        </p>
+      </div></text></g><line x1="768.8731647999999" y1="363.64613760000003" x2="819.9552" y2="176.90964479999997" marker-end="url(#Opta_3_svg_arrowhead_Negative)" class="Opta-Arrow Opta-Negative"></line><g transform="translate(768.8731647999999,363.64613760000003)" class="Opta-Player Opta-Player-9qo448ueot8pfc5oqo378wag9 Opta-Home  Opta-Negative Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-663" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-663"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">30</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots off target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            73‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          J. Frimpong
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="194.20026879999995" y1="313.10492160000007" x2="167.0629376" y2="308.31680639999996" marker-end="url(#Opta_3_svg_arrowhead_Neutral)" class="Opta-Arrow Opta-Neutral"></line><g transform="translate(194.20026879999995,313.10492160000007)" class="Opta-Player Opta-Player-b9g4qurpll4wizajo95c406hh Opta-Away  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-893" data-id="6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-893"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">9</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Blocks
+          </span>
+          <span class="Opta-Tooltip-Value">
+            79‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          H. Kane
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-apoawtpvac4zqlancmvw4nk4o Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=apoawtpvac4zqlancmvw4nk4o" alt="FC Bayern München" class=" Opta-Image-Team-Small"></span>
+          FC Bayern München
+        </p>
+      </div></text></g><line x1="107.99933439999998" y1="282.780192" x2="21.7984" y2="318.4250496" marker-end="url(#Opta_3_svg_arrowhead_Negative)" class="Opta-Arrow Opta-Negative"></line><g transform="translate(107.99933439999998,282.780192)" class="Opta-Player Opta-Player-cv1d56d42wujfuc4kt6bn53x0 Opta-Away  Opta-Negative Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-926" data-id="6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-926"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">39</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots off target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            82‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          M. Tel
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-apoawtpvac4zqlancmvw4nk4o Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=apoawtpvac4zqlancmvw4nk4o" alt="FC Bayern München" class=" Opta-Image-Team-Small"></span>
+          FC Bayern München
+        </p>
+      </div></text></g><line x1="168.65925120000003" y1="358.8580224" x2="65.697024" y2="82.7433792" marker-end="url(#Opta_3_svg_arrowhead_Negative)" class="Opta-Arrow Opta-Negative"></line><g transform="translate(168.65925120000003,358.8580224)" class="Opta-Player Opta-Player-cv1d56d42wujfuc4kt6bn53x0 Opta-Away  Opta-Negative Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-949" data-id="6jtfaj4z314i3cdwwktofmot0-apoawtpvac4zqlancmvw4nk4o-949"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">39</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Shots off target
+          </span>
+          <span class="Opta-Tooltip-Value">
+            84‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          M. Tel
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-apoawtpvac4zqlancmvw4nk4o Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=apoawtpvac4zqlancmvw4nk4o" alt="FC Bayern München" class=" Opta-Image-Team-Small"></span>
+          FC Bayern München
+        </p>
+      </div></text></g><line x1="734.5524224" y1="349.281792" x2="748.121088" y2="340.2375744" marker-end="url(#Opta_3_svg_arrowhead_Neutral)" class="Opta-Arrow Opta-Neutral"></line><g transform="translate(734.5524224,349.281792)" class="Opta-Player Opta-Player-9qo448ueot8pfc5oqo378wag9 Opta-Home  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-756" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-756"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">30</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Blocks
+          </span>
+          <span class="Opta-Tooltip-Value">
+            88‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          J. Frimpong
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="635.5809792" y1="500.37342720000004" x2="819.9552" y2="285.44025600000003" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(635.5809792,500.37342720000004)" class="Opta-Player Opta-Player-9qo448ueot8pfc5oqo378wag9 Opta-Home  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-803" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-803"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">30</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Goals
+          </span>
+          <span class="Opta-Tooltip-Value">
+            90‎+‎5‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          J. Frimpong
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g><line x1="635.5809792" y1="500.37342720000004" x2="819.9552" y2="285.44025600000003" marker-end="url(#Opta_3_svg_arrowhead_Positive)" class="Opta-Arrow Opta-Positive"></line><g transform="translate(635.5809792,500.37342720000004)" class="Opta-Player Opta-Player-9qo448ueot8pfc5oqo378wag9 Opta-Home  Opta-Neutral Opta-JS-Tip" id="Opta_3_6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-803" data-id="6jtfaj4z314i3cdwwktofmot0-7ad69ngbpjuyzv96drf8d9sn2-803"><circle cx="0" cy="0" r="15" class="Opta-Shape"></circle><text x="0" y="7" text-anchor="middle" transform="translate(0,0)rotate(0)">30</text><text class="Opta-Hidden"><div>
+        <h3>
+          <span class="Opta-Tooltip-Key">
+            Goals
+          </span>
+          <span class="Opta-Tooltip-Value">
+            90‎+‎5‎<abbr title="Minute" class="">'</abbr>‎
+          </span>
+        </h3>
+        <p>
+          J. Frimpong
+        </p>
+        <p>
+          <span class="Opta-Image-Holder  Opta-Image-Team Opta-Image-Team-7ad69ngbpjuyzv96drf8d9sn2 Opta-Image-Small"><img src="https://omo.akamai.opta.net/image.php?secure=true&amp;h=omo.akamai.opta.net&amp;sport=football&amp;entity=team&amp;description=badges&amp;dimensions=20&amp;id=7ad69ngbpjuyzv96drf8d9sn2" alt="Bayer 04 Leverkusen" class=" Opta-Image-Team-Small"></span>
+          Bayer 04 Leverkusen
+        </p>
+      </div></text></g></g><defs><marker id="Opta_3_svg_arrowhead_Positive" viewBox="0 -5 10 10" refX="1" refY="1" markerWidth="10" markerHeight="10" orient="auto" class="Opta-Arrow Opta-Positive"><path d="M 0,0 V 2 L3,1 Z"></path></marker></defs><defs><marker id="Opta_3_svg_arrowhead_Negative" viewBox="0 -5 10 10" refX="1" refY="1" markerWidth="10" markerHeight="10" orient="auto" class="Opta-Arrow Opta-Negative"><path d="M 0,0 V 2 L3,1 Z"></path></marker></defs><defs><marker id="Opta_3_svg_arrowhead_Neutral" viewBox="0 -5 10 10" refX="1" refY="1" markerWidth="10" markerHeight="10" orient="auto" class="Opta-Arrow Opta-Neutral"><path d="M 0,0 V 2 L3,1 Z"></path></marker></defs><defs><marker id="Opta_3_svg_arrowhead_Highlight" viewBox="0 -5 10 10" refX="1" refY="1" markerWidth="10" markerHeight="10" orient="auto" class="Opta-Arrow Opta-Highlight"><path d="M 0,0 V 2 L3,1 Z"></path></marker></defs></svg>
