@@ -1,4 +1,4 @@
 .env/
 datasets/
 images/
-
+__pycache__/
