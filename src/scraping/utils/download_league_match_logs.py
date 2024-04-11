@@ -2,18 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
 import pandas as pd
-import argparse
 from pyppeteer.errors import TimeoutError, BrowserError
-from utils import *
+from .utils import *
 import time
 import os
-
-parser = argparse.ArgumentParser(description='.')
-parser.add_argument('--league', default="Serie-A", type=str)
-parser.add_argument('--season', default="2023-2024", type=str)
-parser.add_argument('--all_comps', action="store_true")
-args = parser.parse_args()
-
 
 def parse_minute(minute):
 
@@ -267,13 +259,20 @@ def parse_match_table(team, team_url, team_id, league_dir):
     #     opponent_df.to_csv(f"{team_dir}/opponents.csv", index=False)
 
 
-def get_league_dataset(league_name, season, all_comps):
+def get_league_match_logs(
+        root_dir : str = "./../../datasets/",
+        league_name : str = "Serie-A",
+        season : str = "2023-2024", 
+        all_comps : bool = True
+    ) -> None:
 
-    season_dir = f"./../../datasets/{season}/"
+    root_dir = root_dir + ("/" if root_dir[-1] != "/" else "")
+
+    season_dir = f"{root_dir}{season}/"
     create_dir(season_dir)
 
     if all_comps:
-        season_dir = f"./../../datasets/{season}/All-Competitions/"
+        season_dir = f"{root_dir}{season}/All-Competitions/"
         create_dir(season_dir)
 
     league_dir = f"{season_dir}{league_name}/"
@@ -318,13 +317,6 @@ def get_league_dataset(league_name, season, all_comps):
         # team_url_components = team_url_components[:ref_pos] + [season, url_league_id] + team_url_components[ref_pos:]
         # team_url = base_url + "/".join(team_url_components) + f"-{league_name}"
         # print(team_name, team_url)
-        # # time.sleep(5)
+        time.sleep(3)
         parse_match_table(team_name, team_url, team_id, league_dir)
         print("")
-
-
-league_name = args.league
-season = args.season
-all_comps = args.all_comps
-
-get_league_dataset(league_name, season, all_comps)

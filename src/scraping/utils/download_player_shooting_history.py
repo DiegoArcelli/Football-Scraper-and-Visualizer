@@ -7,13 +7,7 @@ import pandas as pd
 import argparse
 import urllib
 from pyppeteer.errors import TimeoutError, BrowserError
-from utils import *
-
-parser = argparse.ArgumentParser(description='.')
-parser.add_argument("--player_id", default="79443529", type=str)
-parser.add_argument('--league', default="Serie-A", type=str)
-parser.add_argument('--season', default="2023-2024", type=str)
-args = parser.parse_args()
+from .utils import get_league_id, create_dir
 
 
 def adjust_prob(xg, prev_xg):
@@ -109,83 +103,94 @@ def parse_shooting_table(url, player_id, match_id):
 
 
 
-league_id = get_league_id(args.league) if args.league != "All-Comp" else ""
+def get_shooting_history(
+        root_dir : str = "./../../datasets/",
+        player_id : str = "79443529",
+        league_name : str = "Serie-A",
+        season : str = "2023-2024", 
+    ) -> None:
 
-base_url = "https://fbref.com"
-url = f"{base_url}/en/players/{args.player_id}/matchlogs/{args.season}/c{league_id}/"
-print(url)
+    root_dir = root_dir + ("/" if root_dir[-1] != "/" else "")
 
-response = requests.get(url)
+    league_id = get_league_id(league_name) if league_name != "All-Comp" else ""
 
-if response.status_code == 200:
-    html_content = response.text
-else:
-    print("Failed to retrieve the webpage. Status code:", response.status_code)
-    exit()
+    base_url = "https://fbref.com"
+    url = f"{base_url}/en/players/{player_id}/matchlogs/{season}/c{league_id}/"
+    print(url)
 
-soup = BeautifulSoup(html_content, 'html.parser')
+    response = requests.get(url)
 
-player_name = soup.select('div[id="info"]')[0].select('div[id="meta"]')[0].select("h1")[0].select("span")[0].text
+    if response.status_code == 200:
+        html_content = response.text
+    else:
+        print("Failed to retrieve the webpage. Status code:", response.status_code)
+        exit()
 
-match_table = soup.select('table[id^="matchlogs"]')[0]
-matches = match_table.select('tr')
+    soup = BeautifulSoup(html_content, 'html.parser')
 
-matches_url = []
-matches_shots = []
-matches_minutes = []
-match_id = 0
-for match in matches:
+    player_name = soup.select('div[id="info"]')[0].select('div[id="meta"]')[0].select("h1")[0].select("span")[0].text
 
-    match_cell = match.select('td[data-stat="match_report"]')
+    match_table = soup.select('table[id^="matchlogs"]')[0]
+    matches = match_table.select('tr')
 
-    if match_cell == []:
-        continue
+    matches_url = []
+    matches_shots = []
+    matches_minutes = []
+    match_id = 0
+    for match in matches:
 
-    match_url = match_cell[0].select('a')
+        match_cell = match.select('td[data-stat="match_report"]')
 
-    if match_url == []:
-        continue
+        if match_cell == []:
+            continue
 
-    match_url= match_url[0].get("href")
-    match_url = f"{base_url}{match_url}"
-    print(match_url)
-    match_shots, match_minutes = parse_shooting_table(match_url, args.player_id, match_id)
-    matches_shots.append(match_shots)
-    matches_minutes.append(match_minutes)
+        match_url = match_cell[0].select('a')
 
-    match_id += 1
+        if match_url == []:
+            continue
 
-matches_shots = [shot_info for shots_info in matches_shots for shot_info in shots_info]
+        match_url= match_url[0].get("href")
+        match_url = f"{base_url}{match_url}"
+        print(match_url)
+        match_shots, match_minutes = parse_shooting_table(match_url, player_id, match_id)
+        matches_shots.append(match_shots)
+        matches_minutes.append(match_minutes)
 
-file_dir = f"./../../datasets/shots/{args.player_id}"
-create_dir(file_dir)
-file_dir = f"{file_dir}/{args.season}"
-create_dir(file_dir)
+        match_id += 1
 
-file_path = f"{file_dir}/{args.league}.csv"
+    matches_shots = [shot_info for shots_info in matches_shots for shot_info in shots_info]
 
-file_content = "match_id,minutes,xg,xgot,scored,penalty\n"
-for match_id, minutes, gol, xg, xgot, penalty in matches_shots:
-    shot_row = f"{match_id},{minutes},{xg},{xgot},{'True' if gol else 'False'},{'True' if penalty else 'False'}\n"
-    file_content += shot_row
+    file_dir = f"{root_dir}shots/{player_id}"
+    create_dir(file_dir)
+    file_dir = f"{file_dir}/{season}"
+    create_dir(file_dir)
 
-with open(file_path, "w") as file:
-    file.write(file_content)
+    print(f"Saving {player_name} ({player_id}) shooting history for {league_name} {season} in {file_dir + '/'}")
 
+    file_path = f"{file_dir}/{league_name}.csv"
 
-file_content = "match_id,minutes_played\n"
-for match_id, minute in matches_minutes:
-    row = f"{match_id},{minute}\n"
-    file_content += row
+    file_content = "match_id,minutes,xg,xgot,scored,penalty\n"
+    for match_id, minutes, gol, xg, xgot, penalty in matches_shots:
+        shot_row = f"{match_id},{minutes},{xg},{xgot},{'True' if gol else 'False'},{'True' if penalty else 'False'}\n"
+        file_content += shot_row
 
-file_path = f"{file_dir}/minutes.csv"
+    with open(file_path, "w") as file:
+        file.write(file_content)
 
 
-with open(file_path, "w") as file:
-    file.write(file_content)
+    file_content = "match_id,minutes_played\n"
+    for match_id, minute in matches_minutes:
+        row = f"{match_id},{minute}\n"
+        file_content += row
+
+    file_path = f"{file_dir}/minutes.csv"
 
 
-player_name_file_path = f"./../../datasets/shots/{args.player_id}/name"
-with open(player_name_file_path, "w") as file:
-    file.write(player_name)
+    with open(file_path, "w") as file:
+        file.write(file_content)
+
+
+    player_name_file_path = f"{root_dir}shots/{player_id}/name"
+    with open(player_name_file_path, "w") as file:
+        file.write(player_name)
 
