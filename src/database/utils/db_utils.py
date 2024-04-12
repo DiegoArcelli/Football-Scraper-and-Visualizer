@@ -142,7 +142,7 @@ def create_databases(
     if season is None:
         season_directories = [f"{dataset_dir}{d}/" for d in get_directories(dataset_dir) if check_season(d)]
     else:
-        season_directories = [season]
+        season_directories = [f"{dataset_dir}{season}/"]
 
 
     print(dataset_dir)
@@ -154,7 +154,7 @@ def create_databases(
         if league is None:
             leagues_directories = [f"{season_dir}{d}/" for d in get_directories(season_dir) if d != "All-Competitions"]
         else:
-            league_dir = [league]
+            leagues_directories = [f"{season_dir}{league}/"]
         season_files = get_files(season_dir) #[f"{season_dir}{f}" for f in get_files(season_dir) if f.endswith(".csv")]
 
         s = "|" if season_dir != season_directories[-1] else " "
@@ -173,7 +173,7 @@ def create_databases(
             if team is None:
                 teams_directories = [f"{league_dir}{d}/" for d in get_directories(league_dir)]
             else:
-                teams_directories = [team]
+                teams_directories = [f"{league_dir}{team}/"]
                 
             teams_files = get_files(league_dir)#[f"{league_dir}{f}" for f in get_files(league_dir) if f.endswith(".csv")]
             
