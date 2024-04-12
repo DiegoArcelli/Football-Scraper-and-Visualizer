@@ -3,6 +3,26 @@ import sqlite3
 import os
 import pandas as pd
 
+SEP_STR = "  "
+
+admissible_files = [
+    "team.csv",
+    "opponents.csv",
+    "players.csv",
+    "goalkeepers.csv"
+]
+
+
+def extract_last_element_form_path(path, n=1):
+    if path.endswith("/"):
+        return path.split("/")[-2] + "/"
+    elif path.endswith(".csv"):
+        return path.split("/")[-1]
+
+
+def extract_element_form_path(path, n=1):
+    return path.split("/")[-n] + "/"
+
 
 def extract_table_name_from_path(file_path, n=4):
     elements = file_path.split("/")[-n:]
@@ -56,8 +76,12 @@ def create_table(df, table_name, conn, cursor):
             if type(value) == str:
                 value = f"\"{value}\""
 
-            if pd.isna(value):
-                value = "NULL"
+            try:
+                if pd.isna(value):
+                    value = "NULL"
+            except ValueError:
+                print(value)
+                exit()
             
             insert_query += f"{value},"
 
@@ -94,46 +118,83 @@ def get_directories(path):
 
 
 def get_files(path):
-    return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+    admissible_files = [f"{f}.csv" for f in ["team", "opponents", "players", "goalkeepers"]]
+    all_files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))] 
+    filtered_files = [f"{path}{f}" for f in all_files if f.endswith(".csv") and f in admissible_files]
+    return filtered_files
 
 
-root_dir = "./../../"
-datasets_dir = f"{root_dir}datasets/"
-conn = sqlite3.connect(f"{root_dir}databases/football.db")
-cursor = conn.cursor()
+def create_database(root_dir = "./../../"):
+    
+    datasets_dir = f"{root_dir}datasets/"
+    conn = sqlite3.connect(f"{root_dir}databases/football.db")
+    cursor = conn.cursor()
 
 
-season_directories = [f"{datasets_dir}{d}/" for d in get_directories(datasets_dir) if check_season(d)]
+    season_directories = [f"{datasets_dir}{d}/" for d in get_directories(datasets_dir) if check_season(d)]
 
-for season_dir in season_directories:
-    leagues_directories = [f"{season_dir}{d}/" for d in get_directories(season_dir) if d != "All-Competitions"]
-    season_files = [f"{season_dir}{f}" for f in get_files(season_dir) if f.endswith(".csv")]
-    print(season_dir)
-
-    for file in season_files:
-        table_name = extract_table_name_from_path(file, 2)
-        print("\t", file, table_name)
-        df = pd.read_csv(file)
-        create_table(df, table_name, conn, cursor)
-
-    for league_dir in leagues_directories:
-        teams_directories = [f"{league_dir}{d}/" for d in get_directories(league_dir)]
-        teams_files = [f"{league_dir}{f}" for f in get_files(league_dir) if f.endswith(".csv")]
-        print("\t", league_dir)
-        
-        for file in teams_files:
-            table_name = extract_table_name_from_path(file, 3)
-            print("\t\t", file, table_name)
+    print(datasets_dir)
+    print("|")
+    print("|")
+    for season_dir in season_directories:
+        print(f"|__{extract_last_element_form_path(season_dir)}")
+        leagues_directories = [f"{season_dir}{d}/" for d in get_directories(season_dir) if d != "All-Competitions"]
+        season_files = get_files(season_dir) #[f"{season_dir}{f}" for f in get_files(season_dir) if f.endswith(".csv")]
+        for file in season_files:
+            table_name = extract_table_name_from_path(file, 2)
+            print(f"|{SEP_STR*2}|__", extract_last_element_form_path(file), table_name)
             df = pd.read_csv(file)
             create_table(df, table_name, conn, cursor)
 
-        for team_dir in teams_directories:
-            print("\t\t", team_dir)
-            team_files = [f"{team_dir}{f}" for f in get_files(team_dir) if f.endswith(".csv")]
-            for file in team_files:
-                table_name = extract_table_name_from_path(file, 4)
-                print("\t\t\t", file, table_name)
+        print(f"|{SEP_STR*2}|")
+        print(f"|{SEP_STR*2}|")
+        for league_dir in leagues_directories:
+            print(f"|{SEP_STR*2}|__{extract_last_element_form_path(league_dir)}")
+            teams_directories = [f"{league_dir}{d}/" for d in get_directories(league_dir)]
+            teams_files = get_files(league_dir)#[f"{league_dir}{f}" for f in get_files(league_dir) if f.endswith(".csv")]
+            
+            for file in teams_files:
+                table_name = extract_table_name_from_path(file, 3)
+
+                if league_dir != leagues_directories[-1]:
+                    print(f"|{SEP_STR*2}|{SEP_STR*2}|__{extract_last_element_form_path(file)}", table_name)
+                else:
+                    print(f"|{SEP_STR*2} {SEP_STR*2}|__{extract_last_element_form_path(file)}", table_name)
                 df = pd.read_csv(file)
                 create_table(df, table_name, conn, cursor)
-                
-conn.close()
+            # print(f"|{SEP_STR*2}|{SEP_STR*2}|")
+            # print(f"|{SEP_STR*2}|{SEP_STR*2}|")
+            for team_dir in teams_directories:
+                c = "|" if league_dir != leagues_directories[-1] else " "
+                print(f"|{SEP_STR*2}{c}{SEP_STR*2}|")
+                print(f"|{SEP_STR*2}{c}{SEP_STR*2}|")
+                print(f"|{SEP_STR*2}{c}{SEP_STR*2}|__{extract_last_element_form_path(team_dir)}")
+
+                team_files = get_files(team_dir)# [f"{team_dir}{f}" for f in get_files(team_dir) if f.endswith(".csv") and f in admissible_files]
+                for file in team_files:
+                    table_name = extract_table_name_from_path(file, 4)
+                    c1 = " " if league_dir == leagues_directories[-1] else "|" 
+                    c2 = " " if team_dir == teams_directories[-1] else "|"
+                    print(f"|{SEP_STR*2}{c1}{SEP_STR*2}{c2}{SEP_STR*2}|__{extract_last_element_form_path(file)}", table_name)
+
+                    # if team_dir == teams_directories[-1] and league_dir == leagues_directories[-1]:
+                    #     print(f"|{SEP_STR*2} {SEP_STR*2} {SEP_STR*2}|__{extract_last_element_form_path(file)}", table_name)
+                    # elif team_dir != teams_directories[-1] and league_dir == leagues_directories[-1]:
+                    #     print(f"|{SEP_STR*2} {SEP_STR*2}|{SEP_STR*2}|__{extract_last_element_form_path(file)}", table_name)
+                    # elif team_dir == teams_directories[-1] and league_dir != leagues_directories[-1]:
+                    #     print(f"|{SEP_STR*2}|{SEP_STR*2} {SEP_STR*2}|__{extract_last_element_form_path(file)}", table_name)
+                    # else:
+                    #     print(f"|{SEP_STR*2}|{SEP_STR*2}|{SEP_STR*2}|__{extract_last_element_form_path(file)}", table_name)
+                        
+                    df = pd.read_csv(file)
+                    create_table(df, table_name, conn, cursor)
+            if league_dir != leagues_directories[-1]:
+                print(f"|{SEP_STR*2}|")
+                print(f"|{SEP_STR*2}|")
+            else:
+                print(f"|{SEP_STR*2}")
+                print(f"|{SEP_STR*2}")
+                    
+    conn.close()
+
+create_database()
