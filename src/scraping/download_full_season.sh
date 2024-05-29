@@ -4,12 +4,12 @@ else
     season="$1"
 fi
 
-leagues=("Serie-A" "Premier-League" "La-Liga" "Bundesliga" "Ligue-1" "Champions-League")
-leagues=("Serie-A" "Premier-League")
+leagues=("Serie-A" "Premier-League" "La-Liga" "Bundesliga" "Ligue-1") #"Champions-League")
+# leagues=("La-Liga" "Bundesliga" "Ligue-1" "Champions-League")
 
 for league in "${leagues[@]}"
 do 
-    echo -e "\n\nDownloading $league data"
+    # echo -e "\n\nDownloading $league data"
     python3 scrape_teams_data.py --league $league --season $season
 done
 

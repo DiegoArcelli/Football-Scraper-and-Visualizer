@@ -26,10 +26,11 @@ admissible_leagues = [
 Function to read a table of statistics of a given team
 
 Arguments:
-- table: the html code of the 
-- team_name: the name of the team
-- all_comps: 
-
+- table: the html code of the data table to parse
+- team_name: the name of the team of which we want to scrape the data
+- all_comps: boolean argument. If it is set to false the function will only download the data realtive
+  to the games played in the league. If it is set to true the function will download the data relative
+  to the games played in all the competitions of the season
 '''
 def parse_table(
     table,
@@ -37,10 +38,15 @@ def parse_table(
     all_comps
 ):
 
+    # dictionaries which will contains the data of the players, the team and the opponents
     players_stats = {}
     team_stats = {}
     opponent_stats = {}
 
+    '''
+    extracting the header of the table (which contains the names of the attributes) and the body of the 
+    table that contains the values of the 
+    '''
     table_header = table.select('thead')[0]
     table_body = table.select('tbody')[0]
     if not all_comps:
@@ -144,11 +150,13 @@ def parse_table(
 Function to extract data of a given team
 
 Arguments:
-- team:
-- team_url:
-- league_dir: 
-- league_id:
-- all_comps:season
+- team: the name of the team of which we want to scrape the data
+- team_url: the url of the fbref webpage of the team
+- league_dir: the path of the directory that contains the data of the league
+- league_id: the id of the league to which the team belongs
+- all_comps: boolean argument. If it is set to false the function will only download the data realtive
+  to the games played in the league. If it is set to true the function will download the data relative
+  to the games played in all the competitions of the season
 '''
 def get_team_data(
         team : str,
@@ -158,12 +166,14 @@ def get_team_data(
         all_comps : bool
     ) -> None:
 
+    # creation of the directory for the specific team
     dir_name = team.replace(" ", "-")
     team_dir = f"{league_dir}{dir_name}/"
     create_dir(team_dir)
 
     session = HTMLSession()
 
+    # download the html page containing the stats of the team
     is_page_dowloaded = False
     while not is_page_dowloaded:
         try:
@@ -264,7 +274,9 @@ Arguments:
 - league_name: name of the league of which we want to download the data. The possible values for this argument
   are in the variable `admissible_leagues`
 - season: season of which we want to download the data. It has to be a string of the form: "{x}-{x+1}" where x is an integer number
-- all_comps: boolean argument. If it is set to false the function will only download the data realtive to the 
+- all_comps: boolean argument. If it is set to false the function will only download the data realtive
+  to the games played in the league. If it is set to true the function will download the data relative
+  to the games played in all the competitions of the season
 
 Output:
 the data are donwloaded in root_dir the structure of the directories inside root_dir will

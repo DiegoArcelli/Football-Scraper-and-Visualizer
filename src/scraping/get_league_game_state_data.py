@@ -7,6 +7,7 @@ from pyppeteer.errors import TimeoutError, BrowserError
 from utils import *
 import time
 import copy
+import os
 
 parser = argparse.ArgumentParser(description='.')
 parser.add_argument('--league', default="Serie-A", type=str)

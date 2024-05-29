@@ -6,6 +6,117 @@ from pyppeteer.errors import TimeoutError, BrowserError
 from .utils import *
 import time
 import os
+import re
+
+
+'''
+Function to read a table of statistics of a given team
+
+Arguments:
+- table: the html code of the data table to parse
+- team_name: the name of the team of which we want to scrape the data
+- all_comps: boolean argument. If it is set to false the function will only download the data realtive
+  to the games played in the league. If it is set to true the function will download the data relative
+  to the games played in all the competitions of the season
+'''
+def parse_table(
+    table,
+    team_name,
+    all_comps
+):
+
+    # dictionaries which will contains the data of the players, the team and the opponents
+    players_stats = {}
+    team_stats = {}
+
+    '''
+    extracting the header of the table (which contains the names of the attributes) and the body of the 
+    table that contains the values of the 
+    '''
+    table_header = table.select('thead')[0]
+    table_body = table.select('tbody')[0]
+    if not all_comps:
+        table_foot = table.select('tfoot')[0]
+
+    players = table_body.select('tr[data-row]')
+
+    col_names = table_header.select('tr')[1].select('th')
+    # attributes_names = []
+    attributes_keys = []
+
+    attribute_names_map = {}
+
+    players_stats["player_id"] = []
+    players_stats["team"] = []
+
+    for col_name in col_names:
+        attribute_name = col_name.get('aria-label')
+        attribute_key = col_name.get('data-stat')
+
+        if attribute_key == "matches":
+            continue
+
+        # attributes_names.append(attribute_name)
+        attributes_keys.append(attribute_key)
+        attribute_names_map[attribute_key] = attribute_name
+        
+        players_stats[attribute_key] = []
+
+        if attribute_name not in ["Player", "Nation", "Position"]:
+            team_stats[attribute_key] = []
+
+
+    # get players stats
+    for player in players:
+        # player_id = player.select('th')[0].get("data-append-csv")
+        if len(player.select('a')) > 0:
+            player_id = player.select('th')[0].get("data-append-csv")
+            player_name = player.select('a')[0].text
+
+            # print(player_id, player_name)
+            players_stats["player_id"].append(player_id)
+            players_stats["player"].append(player_name)
+            players_stats["team"].append(team_name)
+
+            stats = player.select("td")
+            for stat in stats:
+
+                stat_text = stat.text
+
+                if stat_text == "Matches":
+                    continue
+
+                if stat_text == "":
+                    stat_text = None
+
+                attribute = stat.get('data-stat')
+                players_stats[attribute].append(stat_text)
+
+    if not all_comps:
+
+        # get team stats
+        squad_stats = table_foot.select('tr')[0].select('td')
+        team_stats["team"] = [team_name]
+        for stat in squad_stats:
+
+            attribute = stat.get('data-stat')
+            if attribute in ["nationality", "position", "matches"]:
+                continue
+
+            stat_text = stat.text
+
+            if stat_text == "":
+                stat_text = None
+
+            
+            team_stats[attribute].append(stat_text)
+
+    
+        return players_stats, team_stats
+
+    return players_stats
+
+
 
 def parse_minute(minute):
 
@@ -16,7 +127,9 @@ def parse_minute(minute):
         return int(minute)
     
     minute, extra = minute.split("+")
-    return int(minute) + int(extra)    
+    return int(minute) + int(extra)
+
+
 
 def save_matchlogs_table(file_path, shots_list):
     file_content = "minute,team,player,player_id,scored,xg,xgot,penalty\n"
@@ -34,6 +147,44 @@ def save_game_states(file_path, game_states):
     
     with open(file_path, "w") as match_file:
         match_file.write(file_content)
+
+
+
+def get_match_info_tables(soup, match_url, team_id, venue):
+
+    tables_names = ["summary", "passing", "passing_types", "defense", "possession", "misc"]
+
+    if venue == "Home":
+        team_idx = 0
+        opp_idx = 1
+    else:
+        team_idx = 1
+        opp_idx = 0
+
+    
+    dataframes = []
+
+    for table in tables_names:
+        pattern = re.compile(fr'^stats_.*_{table}$')
+        tables = soup.find_all('table', id=pattern)
+
+        home_table = tables[team_idx]
+        opp_table = tables[opp_idx]
+
+        team_player_stats, team_stats = parse_table(home_table, "Team", False)
+        opponent_player_stats, opp_stats = parse_table(opp_table, "Opponents", False)
+        dataframes.append((table, team_player_stats, team_stats, opponent_player_stats, opp_stats))
+
+
+    pattern = re.compile(r'^keeper_stats_.*$')
+    tables = soup.find_all('table', id=pattern)
+    home_table = tables[team_idx]
+    opp_table = tables[opp_idx]
+    team_player_stats = parse_table(home_table, "Team", True)
+    opponent_player_stats = parse_table(opp_table, "Opponents", True)
+    dataframes.append(("gk", team_player_stats, None, opponent_player_stats, None))
+
+    return dataframes
 
 
 
@@ -112,22 +263,7 @@ def parse_event_panel(soup, venue, first_half_extra, second_half_extra):
 
 
 
-def parse_shooting_table(url, team_id, venue):
-    session = HTMLSession()
-
-    is_page_dowloaded = False
-    while not is_page_dowloaded:
-        try:
-            r = session.get(url)
-            r.html.render()  # this call executes the js in the page
-            is_page_dowloaded = True
-        except (TimeoutError, BrowserError):
-           print("Retrying download")
-           is_page_dowloaded = False 
-            
-    html_content = r.html.html
-
-    soup = BeautifulSoup(html_content, 'html.parser')
+def parse_shooting_table(soup, team_id, venue):
 
     #parse_event_panel(soup, venue)
 
@@ -208,8 +344,10 @@ def parse_match_table(team, team_url, team_id, league_dir):
 
     for match in matches:
 
-        match_file_path = f"{team_dir}match_{match_id}.csv"
-        state_file_path = f"{team_dir}states_{match_id}.csv"
+        match_dir = f"{team_dir}match_{match_id}/"
+
+        match_file_path = f"{match_dir}shots.csv"
+        state_file_path = f"{match_dir}game_states.csv"
         
         if os.path.exists(match_file_path) and os.path.exists(state_file_path):
             match_id += 1
@@ -236,15 +374,43 @@ def parse_match_table(team, team_url, team_id, league_dir):
 
         match_url= match_url[0].get("href")
         match_url = f"{base_url}{match_url}"
+
         print(match_url)
 
-        match_shots, game_states = parse_shooting_table(match_url, team_id, venue)
+        is_page_dowloaded = False
+        while not is_page_dowloaded:
+            try:
+                r = session.get(match_url)
+                r.html.render()  # this call executes the js in the page
+                is_page_dowloaded = True
+            except (TimeoutError, BrowserError):
+                print("Retrying download")
+                is_page_dowloaded = False 
+                
+        html_content = r.html.html
+        match_soup = BeautifulSoup(html_content, 'html.parser')
 
+        match_shots, game_states = parse_shooting_table(match_soup, team_id, venue)
+        dataframes = get_match_info_tables(match_soup, match_url, team_id, venue)
+
+        create_dir(match_dir)
         save_matchlogs_table(match_file_path, match_shots)
         save_game_states(state_file_path, game_states)
+        # table, team_player_stats, team_stats, opponent_player_stats, opp_stats
+
+        for dataframe in dataframes:
+            table, team_player_stats, team_stats, opponent_player_stats, opp_stats = dataframe
+            pd.DataFrame.from_dict(team_player_stats).to_csv(f"{match_dir}team_players_{table}_stats.csv")
+            pd.DataFrame.from_dict(opponent_player_stats).to_csv(f"{match_dir}opponent_players_{table}_stats.csv")
+
+            if team_stats is not None:
+                pd.DataFrame.from_dict(team_stats).to_csv(f"{match_dir}team_{table}_stats.csv")
+                pd.DataFrame.from_dict(opp_stats).to_csv(f"{match_dir}opponent_{table}_stats.csv")
+
 
         match_id += 1
-
+        time.sleep(2)
+        
         
 
     # players_df = merge_data_frames(players_tables, "player_id")
@@ -258,12 +424,14 @@ def parse_match_table(team, team_url, team_id, league_dir):
     #     team_df.to_csv(f"{team_dir}/team.csv", index=False)
     #     opponent_df.to_csv(f"{team_dir}/opponents.csv", index=False)
 
-
+'''
+function to download the match logs of every team of a given league.
+'''
 def get_league_match_logs(
         root_dir : str = "./../../datasets/",
         league_name : str = "Serie-A",
         season : str = "2023-2024", 
-        all_comps : bool = True
+        all_comps : bool = False
     ) -> None:
 
     root_dir = root_dir + ("/" if root_dir[-1] != "/" else "")
@@ -319,4 +487,4 @@ def get_league_match_logs(
         # print(team_name, team_url)
         time.sleep(3)
         parse_match_table(team_name, team_url, team_id, league_dir)
-        print("")
+        print("\n")
