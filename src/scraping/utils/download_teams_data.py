@@ -35,6 +35,7 @@ Arguments:
 def parse_table(
     table,
     team_name,
+    team_id,
     all_comps
 ):
 
@@ -62,6 +63,7 @@ def parse_table(
 
     players_stats["player_id"] = []
     players_stats["team"] = []
+    players_stats["team_id"] = []
 
     for col_name in col_names:
         attribute_name = col_name.get('aria-label')
@@ -92,6 +94,7 @@ def parse_table(
             players_stats["player_id"].append(player_id)
             players_stats["player"].append(player_name)
             players_stats["team"].append(team_name)
+            players_stats["team_id"].append(team_id)
 
             stats = player.select("td")
             for stat in stats:
@@ -112,6 +115,7 @@ def parse_table(
         # get team stats
         squad_stats = table_foot.select('tr')[0].select('td')
         team_stats["team"] = [team_name]
+        team_stats["team_id"] = [team_id]
         for stat in squad_stats:
 
             attribute = stat.get('data-stat')
@@ -128,6 +132,7 @@ def parse_table(
 
         opp_stats = table_foot.select('tr')[1].select('td')
         opponent_stats["team"] = [team_name]
+        opponent_stats["team_id"] = [team_id]
         for stat in opp_stats:
 
             attribute = stat.get('data-stat')
@@ -160,6 +165,7 @@ Arguments:
 '''
 def get_team_data(
         team : str,
+        team_id : str,
         team_url : str, 
         league_dir : str,
         league_id : int,
@@ -222,7 +228,7 @@ def get_team_data(
         table = soup.select(f"table#{table_name}")[0]
 
         if not all_comps:
-            players_stats, team_stats, opponent_stats = parse_table(table, team, all_comps)
+            players_stats, team_stats, opponent_stats = parse_table(table, team, team_id, all_comps)
             players_df = pd.DataFrame.from_dict(players_stats)
             team_df = pd.DataFrame.from_dict(team_stats)
             opponent_df = pd.DataFrame.from_dict(opponent_stats)
@@ -230,7 +236,7 @@ def get_team_data(
             team_tables.append(team_df)
             opponent_table.append(opponent_df)
         else:
-            players_stats = parse_table(table, team, all_comps)
+            players_stats = parse_table(table, team, team_id, all_comps)
             players_df = pd.DataFrame.from_dict(players_stats)
             players_tables.append(players_df)
 
@@ -239,7 +245,7 @@ def get_team_data(
         table = soup.select(f"table#{gk_table_name}")[0]
 
         if not all_comps:
-            gk_stats, team_stats, opponent_stats = parse_table(table, team, all_comps)
+            gk_stats, team_stats, opponent_stats = parse_table(table, team, team_id, all_comps)
             gk_df = pd.DataFrame.from_dict(gk_stats)
             team_df = pd.DataFrame.from_dict(team_stats)
             opponent_df = pd.DataFrame.from_dict(opponent_stats)
@@ -248,7 +254,7 @@ def get_team_data(
             team_tables.append(team_df)
             opponent_table.append(opponent_df)
         else:
-            gk_stats = parse_table(table, team, all_comps)
+            gk_stats = parse_table(table, team, team_id, all_comps)
             gk_df = pd.DataFrame.from_dict(gk_stats)
             gk_tables.append(gk_df)
 
@@ -378,6 +384,7 @@ def get_league_data(
         team_info = team_stats.select("a")[0]
         team_name = team_info.text
         team_url = team_info.get("href")
+        team_id = team_url.split("/")[3]
         team_url_components = team_url.split("/")
         ref_pos = team_url_components.index("squads", 0, len(team_url_components)) + 2
         url_league_id = "all_comps" if all_comps else f"c{league_id}"
@@ -386,6 +393,6 @@ def get_league_data(
         
         print(f"\n{team_url}")
         # we call the function to extract the data of the team
-        get_team_data(team_name, team_url, league_dir, league_id, all_comps)
+        get_team_data(team_name, team_id, team_url, league_dir, league_id, all_comps)
         
         time.sleep(3)

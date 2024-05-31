@@ -22,6 +22,7 @@ Arguments:
 def parse_table(
     table,
     team_name,
+    team_id,
     all_comps
 ):
 
@@ -48,6 +49,7 @@ def parse_table(
 
     players_stats["player_id"] = []
     players_stats["team"] = []
+    players_stats["team_id"] = []
 
     for col_name in col_names:
         attribute_name = col_name.get('aria-label')
@@ -77,6 +79,7 @@ def parse_table(
             players_stats["player_id"].append(player_id)
             players_stats["player"].append(player_name)
             players_stats["team"].append(team_name)
+            players_stats["team_id"].append(team_id)
 
             stats = player.select("td")
             for stat in stats:
@@ -97,6 +100,7 @@ def parse_table(
         # get team stats
         squad_stats = table_foot.select('tr')[0].select('td')
         team_stats["team"] = [team_name]
+        team_stats["team_id"] = [team_id]
         for stat in squad_stats:
 
             attribute = stat.get('data-stat')
@@ -148,9 +152,26 @@ def save_game_states(file_path, game_states):
     with open(file_path, "w") as match_file:
         match_file.write(file_content)
 
+def save_opponent_info(file_path, opponent_name, opponent_id):
+    file_content = f"{opponent_name};{opponent_id}"
+    with open(file_path, "w") as opponent_file:
+        opponent_file.write(file_content)
 
 
-def get_match_info_tables(soup, match_url, team_id, venue):
+def get_opponent_team_info(soup, venue):
+    scorebox = soup.select("div[class='scorebox']")[0]
+
+    idx = 1 if venue == "Home" else 0
+
+    opp_team_info = scorebox.find_all('div', class_=False)[idx].find("strong").find("a")
+    opponent_name = opp_team_info.text
+    opponent_id = opp_team_info.get("href").split("/")[3]
+
+    return opponent_name, opponent_id
+
+
+
+def get_match_info_tables(soup, team, team_id, opponent_name, opponent_id, venue):
 
     tables_names = ["summary", "passing", "passing_types", "defense", "possession", "misc"]
 
@@ -163,6 +184,10 @@ def get_match_info_tables(soup, match_url, team_id, venue):
 
     
     dataframes = []
+    dfs_team_players_stats = []; dfs_opponent_players_stats = []
+    dfs_team_stats = []; dfs_opponent_stats = []
+
+
 
     for table in tables_names:
         pattern = re.compile(fr'^stats_.*_{table}$')
@@ -171,20 +196,29 @@ def get_match_info_tables(soup, match_url, team_id, venue):
         home_table = tables[team_idx]
         opp_table = tables[opp_idx]
 
-        team_player_stats, team_stats = parse_table(home_table, "Team", False)
-        opponent_player_stats, opp_stats = parse_table(opp_table, "Opponents", False)
-        dataframes.append((table, team_player_stats, team_stats, opponent_player_stats, opp_stats))
+        team_player_stats, team_stats = parse_table(home_table, team, team_id, False)
+        opponent_player_stats, opp_stats = parse_table(opp_table, opponent_name, opponent_id, False)
 
+
+
+        dfs_team_players_stats.append(pd.DataFrame.from_dict(team_player_stats))
+        dfs_opponent_players_stats.append(pd.DataFrame.from_dict(opponent_player_stats))
+        dfs_team_stats.append(pd.DataFrame.from_dict(team_stats))
+        dfs_opponent_stats.append(pd.DataFrame.from_dict(opp_stats))
+
+        
 
     pattern = re.compile(r'^keeper_stats_.*$')
     tables = soup.find_all('table', id=pattern)
     home_table = tables[team_idx]
     opp_table = tables[opp_idx]
-    team_player_stats = parse_table(home_table, "Team", True)
-    opponent_player_stats = parse_table(opp_table, "Opponents", True)
-    dataframes.append(("gk", team_player_stats, None, opponent_player_stats, None))
+    team_gk_stats = parse_table(home_table, team, team_id, True)
+    opponent_gk_stats = parse_table(opp_table, opponent_name, opponent_id, True)
+    df_team_gk_stats = pd.DataFrame.from_dict(team_gk_stats)
+    df_opponent_gk_stats = pd.DataFrame.from_dict(opponent_gk_stats)
+    # dataframes.append(("gk", team_player_stats, None, opponent_player_stats, None))
 
-    return dataframes
+    return dfs_team_players_stats, dfs_opponent_players_stats, dfs_team_stats, dfs_opponent_stats, df_team_gk_stats, df_opponent_gk_stats
 
 
 
@@ -348,8 +382,9 @@ def parse_match_table(team, team_url, team_id, league_dir):
 
         match_file_path = f"{match_dir}shots.csv"
         state_file_path = f"{match_dir}game_states.csv"
+        opponent_file_path = f"{match_dir}opponent_info.txt"
         
-        if os.path.exists(match_file_path) and os.path.exists(state_file_path):
+        if os.path.exists(opponent_file_path): # and os.path.exists(match_file_path):
             match_id += 1
             continue
 
@@ -390,23 +425,34 @@ def parse_match_table(team, team_url, team_id, league_dir):
         html_content = r.html.html
         match_soup = BeautifulSoup(html_content, 'html.parser')
 
+        opponent_name, opponent_id = get_opponent_team_info(match_soup, venue)
+
+
         match_shots, game_states = parse_shooting_table(match_soup, team_id, venue)
-        dataframes = get_match_info_tables(match_soup, match_url, team_id, venue)
+        dataframes = get_match_info_tables(match_soup, team, team_id, opponent_name, opponent_id, venue)
+        team_players_stats, opponent_players_stats, team_stats, opponent_stats, team_gk_stats, opponent_gk_stats = dataframes
+        
+        team_players_stats = merge_data_frames(team_players_stats, "player_id")
+        opponent_players_stats = merge_data_frames(opponent_players_stats, "player_id")
+        team_stats = merge_data_frames(team_stats, "team")
+        opponent_stats = merge_data_frames(opponent_stats, "team")
+
+        team_stats.drop(['shirtnumber', 'age'], axis=1, inplace=True)
+        opponent_stats.drop(['shirtnumber', 'age'], axis=1, inplace=True)
 
         create_dir(match_dir)
-        save_matchlogs_table(match_file_path, match_shots)
-        save_game_states(state_file_path, game_states)
+
         # table, team_player_stats, team_stats, opponent_player_stats, opp_stats
 
-        for dataframe in dataframes:
-            table, team_player_stats, team_stats, opponent_player_stats, opp_stats = dataframe
-            pd.DataFrame.from_dict(team_player_stats).to_csv(f"{match_dir}team_players_{table}_stats.csv")
-            pd.DataFrame.from_dict(opponent_player_stats).to_csv(f"{match_dir}opponent_players_{table}_stats.csv")
-
-            if team_stats is not None:
-                pd.DataFrame.from_dict(team_stats).to_csv(f"{match_dir}team_{table}_stats.csv")
-                pd.DataFrame.from_dict(opp_stats).to_csv(f"{match_dir}opponent_{table}_stats.csv")
-
+        team_players_stats.to_csv(f"{match_dir}team_players_stats.csv", index=False)
+        opponent_players_stats.to_csv(f"{match_dir}opponent_players_stats.csv", index=False)
+        team_stats.to_csv(f"{match_dir}team_stats.csv", index=False)
+        opponent_stats.to_csv(f"{match_dir}opponent_stats.csv", index=False)
+        team_gk_stats.to_csv(f"{match_dir}team_gk_stats.csv", index=False)
+        opponent_gk_stats.to_csv(f"{match_dir}opponent_gk_stats.csv", index=False)
+        save_matchlogs_table(match_file_path, match_shots)
+        save_game_states(state_file_path, game_states)
+        save_opponent_info(opponent_file_path, opponent_name, opponent_id)
 
         match_id += 1
         time.sleep(2)
