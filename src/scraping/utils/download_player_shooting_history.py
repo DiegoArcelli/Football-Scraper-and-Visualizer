@@ -45,7 +45,7 @@ def get_minutes_played(soup, player_id):
     
     return "0"
 
-def parse_shooting_table(url, player_id, match_id):
+def parse_shooting_table(url, match_code, player_id, match_id):
     response = requests.get(url)
 
     if response.status_code == 200:
@@ -96,9 +96,9 @@ def parse_shooting_table(url, player_id, match_id):
         #     return xg, xgot
             
 
-        match_shots_info.append((match_id, minute, outcome, xg, xgot, penalty))
+        match_shots_info.append((match_code, match_id, minute, outcome, xg, xgot, penalty))
 
-    return match_shots_info, (match_id, minutes_played)
+    return match_shots_info, (match_code, match_id, minutes_played)
     
 
 
@@ -136,7 +136,7 @@ def get_shooting_history(
     matches_url = []
     matches_shots = []
     matches_minutes = []
-    match_id = 0
+    match_id = 1
     for match in matches:
 
         match_cell = match.select('td[data-stat="match_report"]')
@@ -149,10 +149,13 @@ def get_shooting_history(
         if match_url == []:
             continue
 
+
         match_url= match_url[0].get("href")
         match_url = f"{base_url}{match_url}"
+        match_code = match_url.split("/")[5]
         print(match_url)
-        match_shots, match_minutes = parse_shooting_table(match_url, player_id, match_id)
+
+        match_shots, match_minutes = parse_shooting_table(match_url, match_code, player_id, match_id)
         matches_shots.append(match_shots)
         matches_minutes.append(match_minutes)
 
@@ -169,18 +172,18 @@ def get_shooting_history(
 
     file_path = f"{file_dir}/{league_name}.csv"
 
-    file_content = "match_id,minutes,xg,xgot,scored,penalty\n"
-    for match_id, minutes, gol, xg, xgot, penalty in matches_shots:
-        shot_row = f"{match_id},{minutes},{xg},{xgot},{'True' if gol else 'False'},{'True' if penalty else 'False'}\n"
+    file_content = "match_id,round,minutes,xg,xgot,scored,penalty\n"
+    for match_code, match_id, minutes, gol, xg, xgot, penalty in matches_shots:
+        shot_row = f"{match_code},{match_id},{minutes},{xg},{xgot},{'True' if gol else 'False'},{'True' if penalty else 'False'}\n"
         file_content += shot_row
 
     with open(file_path, "w") as file:
         file.write(file_content)
 
 
-    file_content = "match_id,minutes_played\n"
-    for match_id, minute in matches_minutes:
-        row = f"{match_id},{minute}\n"
+    file_content = "match_id,round,minutes_played\n"
+    for match_code, match_id, minute in matches_minutes:
+        row = f"{match_code},{match_id},{minute}\n"
         file_content += row
 
     file_path = f"{file_dir}/minutes.csv"

@@ -135,6 +135,11 @@ def parse_minute(minute):
 
 
 
+def save_match_info(match_info_path, match_id, match_code):
+    file_content = f"round,match_id\n{match_id},{match_code}"
+    with open(match_info_path, "w") as match_file:
+        match_file.write(file_content)
+
 def save_matchlogs_table(file_path, shots_list):
     file_content = "minute,team,player,player_id,scored,xg,xgot,penalty\n"
     for (minute, team, player, player_id, outcome, xg, xgot, penalty) in shots_list:
@@ -153,7 +158,7 @@ def save_game_states(file_path, game_states):
         match_file.write(file_content)
 
 def save_opponent_info(file_path, opponent_name, opponent_id):
-    file_content = f"{opponent_name};{opponent_id}"
+    file_content = f"opponent_name,opponent_id\n{opponent_name},{opponent_id}"
     with open(file_path, "w") as opponent_file:
         opponent_file.write(file_content)
 
@@ -165,6 +170,7 @@ def get_opponent_team_info(soup, venue):
 
     opp_team_info = scorebox.find_all('div', class_=False)[idx].find("strong").find("a")
     opponent_name = opp_team_info.text
+    print(opponent_name)
     opponent_id = opp_team_info.get("href").split("/")[3]
 
     return opponent_name, opponent_id
@@ -373,7 +379,7 @@ def parse_match_table(team, team_url, team_id, league_dir):
     match_table = soup.select('table[id^="matchlogs"]')[0]
     matches = match_table.select('tr')
 
-    match_id = 0
+    match_id = 1
     base_url = "https://fbref.com"
 
     for match in matches:
@@ -382,7 +388,8 @@ def parse_match_table(team, team_url, team_id, league_dir):
 
         match_file_path = f"{match_dir}shots.csv"
         state_file_path = f"{match_dir}game_states.csv"
-        opponent_file_path = f"{match_dir}opponent_info.txt"
+        opponent_file_path = f"{match_dir}opponent_info.csv"
+        match_info_path = f"{match_dir}match_info.csv"
         
         if os.path.exists(opponent_file_path): # and os.path.exists(match_file_path):
             match_id += 1
@@ -425,6 +432,8 @@ def parse_match_table(team, team_url, team_id, league_dir):
         html_content = r.html.html
         match_soup = BeautifulSoup(html_content, 'html.parser')
 
+        match_code = match_url.split("/")[5]
+
         opponent_name, opponent_id = get_opponent_team_info(match_soup, venue)
 
 
@@ -452,6 +461,7 @@ def parse_match_table(team, team_url, team_id, league_dir):
         opponent_gk_stats.to_csv(f"{match_dir}opponent_gk_stats.csv", index=False)
         save_matchlogs_table(match_file_path, match_shots)
         save_game_states(state_file_path, game_states)
+        save_match_info(match_info_path, match_id, match_code)
         save_opponent_info(opponent_file_path, opponent_name, opponent_id)
 
         match_id += 1
