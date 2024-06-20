@@ -8,11 +8,9 @@ class DataBase:
 
 
     def __init__(self, data):
-        self.season = data["season"]
-        self.leagues = data["leagues"]
-        self.x_axis = data["x_axis"]
-        self.y_axis = data["y_axis"]
-
+        for key in data.keys():
+            setattr(DataBase, key, data[key])
+        print(self.x_label)
 
 
     def execute_query(self):
@@ -26,7 +24,19 @@ class DataBase:
         teams = []; x_axis = []; y_axis = []
         for table_name in table_names:
 
-            query = f"SELECT team, {self.x_axis}, {self.y_axis} from {table_name}"
+            if self.x_norm_attr == "":
+                x_attr = self.x_axis
+            else:
+                x_attr = f"{self.x_axis}/{self.x_norm_attr}*{self.x_norm_quant}"
+
+
+            if self.y_norm_attr == "":
+                y_attr = self.y_axis
+            else:
+                y_attr = f"{self.y_axis}/{self.y_norm_attr}*{self.y_norm_quant}"
+                
+
+            query = f"SELECT team, {x_attr}, {y_attr} from {table_name}"
 
             print(f"Executing query {query}")
 
@@ -47,12 +57,13 @@ class DataBase:
                 "teams": teams,
                 "x_axis": x_axis,
                 "y_axis": y_axis,
-                "x_axis_label": self.x_axis,
-                "y_axis_label": self.y_axis
+                "x_axis_label": self.x_label,
+                "y_axis_label": self.y_label,
+                "title": self.title
             }
 
         vis = Visualizer(result)
-        return vis.scatter_plot("CULoooo")
+        return vis.scatter_plot()
 
 
 class Visualizer:
@@ -63,9 +74,11 @@ class Visualizer:
 
     def scatter_plot(
         self,
-        title,
         show_avg=True,
     ):
+
+        title = self.data["title"]
+        teams = self.data["teams"]
 
         x_column = self.data["x_axis_label"]
         y_column = self.data["y_axis_label"]
@@ -79,10 +92,25 @@ class Visualizer:
         x_avg = x_data.mean()
         y_avg = y_data.mean()
 
+        annotation_template = go.layout.Template()
+        annotation_template.layout.annotationdefaults = dict(font=dict(color="white", size=12))
+
+        annotations = [
+            dict(
+                text=self.data["teams"][i],
+                x=x_data[i],
+                y=y_data[i],
+                #ay=0.1
+            ) for i in range(len(x_data))
+        ]
+
+
+        text = [f"Team: {teams[i]}<br>{x_column}: {x_data[i]}<br>{y_column}: {y_data[i]}" for i in range(len(teams))]
         scatter_plot = go.Scatter(
             x=x_data,
             y=y_data,
             mode='markers',
+            text=text,
             hoverinfo='text',
         )
 
@@ -106,10 +134,18 @@ class Visualizer:
             ), 
             selector=dict(mode='markers'))
 
-        # fig.update_layout(
-        #     template=annotation_template,
-        #     annotations=annotations
-        # )
+        fig.update_layout(
+            template=annotation_template,
+            annotations=annotations
+        )
+
+        fig.update_annotations(
+            font=dict(color="white"),
+            bgcolor="DarkSlateGrey",
+            arrowcolor="DarkSlateGrey",
+            bordercolor="black",
+            arrowhead=2,
+        )
 
         if show_avg:
             fig.add_vline(x=x_avg, line_width=1, line_dash="dash")

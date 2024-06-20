@@ -4,135 +4,68 @@
 <head>
     <title>Data</title>
     <!-- <script src="./html/team_form_handle.js"></script> -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">  -->
 </head>
 
 <body>
 
-    <script>
-
-        function handle_team_form() {
-
-            seasonButtons = document.querySelectorAll('input[name="season"]');
-            seasonButtons.forEach(function(button){
-                if (button.checked) {
-                    season = button.value
-                } 
-            })
-            console.log(season)
-
-            leagues = []
-            leagueButtons = document.querySelectorAll('input[name="league"]'); 
-            leagueButtons.forEach(function(button){
-                if (button.checked) {
-                    leagues.push(button.value)
-                }
-            })
-            console.log(leagues)
-
-
-            x_axis = document.getElementById("x-axis").value
-            y_axis = document.getElementById("y-axis").value
-            console.log(x_axis)
-            console.log(y_axis)
-            
-            data = {
-                "x_axis": x_axis,
-                "y_axis": y_axis,
-                "season": season,
-                "leagues": leagues
-            }
-            console.log(data)
-
-            // Define the URL and data for the POST request
-            var url = 'http://localhost:5000/query';
-
-            // Define the options for the fetch request
-            var options = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json' // Specify content type as JSON
-                },
-                body: JSON.stringify(data) // Convert data to JSON string
-            };
-
-            // Make the POST request
-
-            data = null
-
-            fetch(url, options)
-            .then(response => {
-                // Check if the response is successful
-                if (!response.ok) {
-                throw new Error('Network response was not ok');
-                }
-                // Parse the JSON response
-                return response.json();
-            })
-            .then(data => {
-                // Handle the response data
-                // console.log('Response:', data);
-                //document.getElementById("plot").innerHTML = data
-                var scriptElement = document.createElement('div');
-                scriptElement.textContent = data
-                document.getElementById("plot").appendChild(scriptElement)
-                /*scripts = document.getElementById("plot").getElementsByTagName("script")
-                console.log(scripts)
-                for (var i = 0; i < scripts.length; i++) {
-                    console.log(scripts[i].innerHTML)
-                }*/
-            })
-            .catch(error => {
-                // Handle any errors that occurred during the fetch
-                console.error('Error:', error);
-            });
-
-            
-
-
-
-        }
-
-    </script>
-
     <h3>Team data visualization</h3>
     <div id="data-form">
-        <fieldset>
-            <legend>Season</legend>
-            <input type="radio" id="2023-2024" name="season" value="2023-2024">
-            <label>2023-2024</label><br>
-            <input type="radio" id="2022-2023" name="season" value="2022-2023">
-            <label>2022-2023</label><br>
-            <input type="radio" id="2021-2022" name="season" value="2021-2022">
-            <label>2021-2022</label><br>
-        </fieldset>
-        <fieldset>
-            <legend>Leagues</legend>
-            <br/>
-            <input type="checkbox" name="league" value="Serie-A"/> Serie A
-            <br/>
-            <input type="checkbox" name="league" value="Premier-League"/> Premier League
-            <br/>
-            <input type="checkbox" name="league" value="La-Liga"/> La Liga
-            <br/>
-            <input type="checkbox" name="league" value="Bundesliga"/> Bundesliga
-            <br/>
-            <input type="checkbox" name="league" value="Ligue-1"/> Ligue One
-            <br/>
-        </fieldset>
-        <fieldset>
-            <legend>Data</legend>
-            <label for="x-axis">x axis:</label>
-            <input type="text" id="x-axis" name="x-axis" size="20" />
-            <br/>
-            <label for="y-axis">y axis:</label>
-            <input type="text" id="y-axis" name="y-axis" size="20" />
-            <br/>
-        </fieldset>
-        <input type="button" value="Submit" onclick="handle_team_form()"/>
+        <form action="{{ url_for('read_form')}}" method="post" target="_blank">
+            <fieldset>
+                <legend>Season</legend>
+                <input type="radio" id="2023-2024" name="season" value="2023-2024">
+                <label>2023-2024</label><br>
+                <input type="radio" id="2022-2023" name="season" value="2022-2023">
+                <label>2022-2023</label><br>
+                <input type="radio" id="2021-2022" name="season" value="2021-2022">
+                <label>2021-2022</label><br>
+            </fieldset>
+            <fieldset>
+                <legend>Leagues</legend>
+                <br/>
+                <input type="checkbox" name="leagues" value="Serie-A"/> Serie A
+                <br/>
+                <input type="checkbox" name="leagues" value="Premier-League"/> Premier League
+                <br/>
+                <input type="checkbox" name="leagues" value="La-Liga"/> La Liga
+                <br/>
+                <input type="checkbox" name="leagues" value="Bundesliga"/> Bundesliga
+                <br/>
+                <input type="checkbox" name="leagues" value="Ligue-1"/> Ligue One
+                <br/>
+            </fieldset>
+            <fieldset>
+                <legend>x data</legend>
+                <label for="x_axis">x axis:</label>
+                <input type="text" id="x_axis" name="x_axis" size="20" />
+                <br/>
+                <label for="x_label">x lable:</label>
+                <input type="text" id="x_label" name="x_label" size="20" />
+                <br/>
+                <label for="x_norm_attr">normalize </label> <input type="text" id="x_norm_attr" name="x_norm_attr" size="20" /> <label for="x_norm_quant">every </label> <input type="text" id="x_norm_quant" name="x_norm_quant" size="20" />
+            </fieldset>
+            <fieldset>
+                <legend>y data</legend>
+                <label for="y_axis">y axis:</label>
+                <input type="text" id="y_axis" name="y_axis" size="20" />
+                <br/>
+                <label for="y-label">y label:</label>
+                <input type="text" id="y_label" name="y_label" size="20" />
+                <br/>
+                <label for="y_norm_attr">normalize </label> <input type="text" id="y_norm_attr" name="y_norm_attr" size="20" /> <label for="y_norm_quant">every </label> <input type="text" id="y_norm_quant" name="y_norm_quant" size="20" />
+            </fieldset>
+            <fieldset>    
+                <legend>Title</legend>
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" size="20" />
+            </fieldset>
+            <input type="submit" value="Submit" target="_blank"/>
+        </form>
     </div>
-    <div id="plot">
-            
-    </div>
+    <!-- <div id="plot">
+        {{ plot_code }}
+    </div> -->
 </body>
 
 </html>
