@@ -36,7 +36,7 @@ class DataBase:
                 y_attr = f"{self.y_axis}/{self.y_norm_attr}*{self.y_norm_quant}"
                 
 
-            query = f"SELECT team, {x_attr}, {y_attr} from {table_name}"
+            query = f"SELECT team, {x_attr}, {y_attr} FROM {table_name}"
 
             print(f"Executing query {query}")
 

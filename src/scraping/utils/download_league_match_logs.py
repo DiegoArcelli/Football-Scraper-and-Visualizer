@@ -7,6 +7,7 @@ from .utils import *
 import time
 import os
 import re
+import copy
 
 
 '''
@@ -150,9 +151,9 @@ def save_matchlogs_table(file_path, shots_list):
 
 
 def save_game_states(file_path, game_states):
-    file_content = "start_minute,end_minute,state\n"
-    for (minute_start, minute_end, state) in game_states:
-        file_content += f"{minute_start},{minute_end},{state}\n"
+    file_content = "half,start_minute,end_minute,state\n"
+    for (half,minute_start, minute_end, state) in game_states:
+        file_content += f"{half},{minute_start},{minute_end},{state}\n"
     
     with open(file_path, "w") as match_file:
         match_file.write(file_content)
@@ -168,9 +169,9 @@ def get_opponent_team_info(soup, venue):
 
     idx = 1 if venue == "Home" else 0
 
-    opp_team_info = scorebox.find_all('div', class_=False)[idx].find("strong").find("a")
+    opp_team_info = scorebox.find_all('div', class_=False, recursive=False)[idx].find("strong").find("a")
     opponent_name = opp_team_info.text
-    print(opponent_name)
+    # print(venue, opponent_name)
     opponent_id = opp_team_info.get("href").split("/")[3]
 
     return opponent_name, opponent_id
@@ -227,8 +228,46 @@ def get_match_info_tables(soup, team, team_id, opponent_name, opponent_id, venue
     return dfs_team_players_stats, dfs_opponent_players_stats, dfs_team_stats, dfs_opponent_stats, df_team_gk_stats, df_opponent_gk_stats
 
 
+def parse_event_panel(soup, venue, first_half_minutes, second_half_minutes):
 
-def parse_event_panel(soup, venue, first_half_extra, second_half_extra):
+    class Minute:
+
+        def __init__(self, minute):
+            self.minute = minute
+
+        def __repr__(self):
+            return self.minute
+
+        def __gt__(self, other):
+
+            x = self.minute; y = other.minute
+
+            if "+" in x:
+                x_min, x_extra = x.split("+")
+                x_min = int(x_min); x_extra = int(x_extra)
+            else:
+                x_min = int(x); x_extra = None
+
+            if "+" in y:
+                y_min, y_extra = y.split("+")
+                y_min = int(y_min); y_extra = int(y_extra)
+            else:
+                y_min = int(y); y_extra = None
+
+            # both have extra time
+            if x_extra is not None and y_extra is not None and x_min == y_min:
+                return x_extra > y_extra
+
+            return x_min > y_min
+
+
+    def is_first_half(minute):
+        if "+" not in minute and int(minute) <= 45:
+            return True
+        if "+" in minute and int(minute.split("+")[0]) <= 45:
+            return True
+        return False
+
 
     scorebox = soup.select("div[class='scorebox']")[0]
 
@@ -245,8 +284,8 @@ def parse_event_panel(soup, venue, first_half_extra, second_half_extra):
     goals_minute = []
 
     for team, events in [("home", team_events), ("away", opponent_events)]:
-
         for event in events:
+
             event_type = event.select("div[class^='event']")[0].get("class")
             
             if type(event_type) == list:
@@ -256,26 +295,41 @@ def parse_event_panel(soup, venue, first_half_extra, second_half_extra):
                 minute = event.text.split('·')[-1]
                 minute = minute.replace(" ", "")
                 minute = minute.replace("’", "")
+                goals_minute.append((team, Minute(minute)))
 
-                if "+" in minute:
-                    minute, extra = minute.split("+")
-                    minute = int(minute)
-                    extra = int(extra)
-                    minute = minute + extra + (first_half_extra if minute > 45 else 0)
-                else:
-                    minute = int(minute)
-                
-                goals_minute.append((team, minute))
-    
-    goals_minute.sort(key=lambda x: x[1])
-    full_minutes = second_half_extra + 90
+    # goals_minute.sort(key=lambda x: x[1])
+    goals_minute = sorted(goals_minute, key=lambda x: x[1])
+    goals_minute = [(venue, m.minute) for venue, m in goals_minute]    
+
+    minutes = [minute for _, minute in goals_minute]
+    first_half_max = [minute for minute in minutes if minute[:2] == "45"]
+    second_half_max = [minute for minute in minutes if minute[:2] == "90"]
+    first_half_max = "45" if first_half_max == [] else first_half_max[-1]
+    second_half_max = "90" if second_half_max == [] else second_half_max[-1]
+    first_half_minutes = first_half_minutes if parse_minute(first_half_minutes) > parse_minute(first_half_max) else first_half_max
+    second_half_minutes = second_half_minutes if parse_minute(second_half_minutes) > parse_minute(second_half_max) else second_half_max
+    # full_minutes = second_half_extra + 90
     # exit()
 
     home_goals, away_goals = 0, 0
-    ref_minute = 0
+    ref_minute = 1
     state = "draw"
     states = []
+    first_half = True
+
+    # print(goals_minute)
+
     for team, minute in goals_minute:
+        if first_half and not is_first_half(minute):
+            if states == []:
+                states.append(("first", ref_minute, first_half_minutes, state))
+            else:
+                _, old_start, old_end, old_state = states[-1]
+                states.append(("first", old_end, first_half_minutes, new_state))
+                # states.append((old_end, first_half_minutes, old_state))
+            first_half = False
+            ref_minute = "46"
+
 
         if team == "home":
             home_goals += 1
@@ -292,15 +346,19 @@ def parse_event_panel(soup, venue, first_half_extra, second_half_extra):
 
         if new_state != state:
             #minutes_in_state = minute - ref_minute
-            states.append((ref_minute, minute, state))
+            states.append(("first" if first_half else "second", ref_minute, minute, state))
             state = new_state
             ref_minute = minute
-
+        
     #minutes_in_state = full_minutes - ref_minute
-    states.append((ref_minute, full_minutes, state))
-    
+    _, last_start, last_end, last_state = states[-1]
+    # case in which there have been no goals in the second half
+    if is_first_half(ref_minute):
+        states.append(("first", last_end, first_half_minutes, state))
+        ref_minute = "46"
+    states.append(("second", ref_minute, second_half_minutes, state))
+        
     return states
-
 
 
 def parse_shooting_table(soup, team_id, venue):
@@ -331,27 +389,13 @@ def parse_shooting_table(soup, team_id, venue):
     minutes = list(map(lambda x: x[0], match_shots_info))
     first_half_minute = [minute for minute in minutes if minute[:2] == "45"]
     second_half_minute = [minute for minute in minutes if minute[:2] == "90"]
-    first_half_minute = 45 if first_half_minute == [] else first_half_minute[-1]
-    second_half_minute = 45 if second_half_minute == [] else second_half_minute[-1]
-    first_half_minute = parse_minute(first_half_minute)
-    second_half_minute = parse_minute(second_half_minute)
+    first_half_minutes = "45" if first_half_minute == [] else first_half_minute[-1]
+    second_half_minutes = "90" if second_half_minute == [] else second_half_minute[-1]
 
-    if first_half_minute < 45:
-        first_half_extra = 0
-    else:
-        first_half_extra = first_half_minute - 45
-
-    if second_half_minute < 90:
-        second_half_extra = 0
-    else:
-        second_half_extra = second_half_minute - 90
-
-    game_states = parse_event_panel(soup, venue, first_half_extra, second_half_extra)
+    game_states = parse_event_panel(soup, venue, first_half_minutes, second_half_minutes)
 
     return match_shots_info, game_states
     
-
-
 
 def parse_match_table(team, team_url, team_id, league_dir):
 
@@ -377,10 +421,14 @@ def parse_match_table(team, team_url, team_id, league_dir):
     soup = BeautifulSoup(html_content, 'html.parser')
 
     match_table = soup.select('table[id^="matchlogs"]')[0]
-    matches = match_table.select('tr')
+    matches = match_table.select('tr')[1:]
 
     match_id = 1
     base_url = "https://fbref.com"
+
+    # for match in matches:
+    #     print(match)
+    # exit()
 
     for match in matches:
 
@@ -465,7 +513,7 @@ def parse_match_table(team, team_url, team_id, league_dir):
         save_opponent_info(opponent_file_path, opponent_name, opponent_id)
 
         match_id += 1
-        time.sleep(2)
+        time.sleep(3)
         
         
 

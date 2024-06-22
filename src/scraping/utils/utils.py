@@ -16,6 +16,8 @@ def get_league_id(league_name):
         return 13
     elif league_name == "Champions-League":
         return 8
+    elif league_name == "European-Championship":
+        return 676
   
 
 '''

@@ -7,6 +7,7 @@ from .utils import create_dir, get_league_id, merge_data_frames
 import time
 
 
+national_tournaments = [676]
 
 '''
 list of admissible values for the the league argument
@@ -17,7 +18,8 @@ admissible_leagues = [
     "La-Liga",
     "Bundesliga",
     "Ligue-1",
-    "Champions-League"
+    "Champions-League",
+    "European-Championship"
 ]
 
 
@@ -351,6 +353,11 @@ def get_league_data(
     # definition of the fbref url containing the data of the league
     base_url = "https://fbref.com"
     url = f"https://fbref.com/en/comps/{league_id}/{season}/{league_name}-Stats"
+
+
+    if league_id in national_tournaments:
+        url = f"https://fbref.com/en/comps/{league_id}/{season}/stats/{season}-{league_name}-Stats"
+
     print(f"Downloading {league_name} {season} data")
     print(url)
     response = requests.get(url)
@@ -365,14 +372,22 @@ def get_league_data(
 
     # we extract from the html page of the the table containing a list of all the teams of the league
     soup = BeautifulSoup(html_content, 'html.parser')
-    div = soup.select('div[id^="all_results"]')[-1]
-    table = div.select('table[class^="stats_table"]')[0].select('tbody')[0]
-    teams = table.select('tr')
+    if league_id not in national_tournaments:
+        div = soup.select('div[id^="all_results"]')[-1]
+        table = div.select('table[class^="stats_table"]')[0].select('tbody')[0]
+        teams = table.select('tr')
+    else:
+        div = soup.select('div[id^="all_stats_squads"]')[0]
+        table = div.select('table[class^="stats_table"]')[0].select('tbody')[0]
+        teams = table.select('tr')[1:]        
 
     # iterate through each row of the table
     for team in teams:
         
-        team_stats = team.select('td[data-stat="team"]')[0]
+        if league_id not in national_tournaments:
+            team_stats = team.select('td[data-stat="team"]')[0]
+        else:
+            team_stats = team.select('th[data-stat="team"]')[0]
 
         if  len(team_stats.select("a")) == 0:
             continue
