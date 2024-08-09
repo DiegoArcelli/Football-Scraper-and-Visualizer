@@ -1,5 +1,4 @@
 # shooting history format
-
 import requests
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
@@ -7,8 +6,24 @@ import pandas as pd
 import argparse
 import urllib
 from pyppeteer.errors import TimeoutError, BrowserError
-from .utils import get_league_id, create_dir
+from .utils import league_to_id_map, create_dir
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
+import os
+import io
 
+
+def get_match_ids(file_path):
+    df = pd.read_csv(file_path)
+    match_ids = df["match_id"].unique().tolist()
+    return match_ids
 
 def adjust_prob(xg, prev_xg):
     xg = float(xg)
@@ -45,14 +60,19 @@ def get_minutes_played(soup, player_id):
     
     return "0"
 
-def parse_shooting_table(url, match_code, player_id, match_id):
-    response = requests.get(url)
+def parse_shooting_table(driver, url, match_code, player_id, match_id):
+    # response = requests.get(url)
 
-    if response.status_code == 200:
-        html_content = response.text
-    else:
-        print("Failed to retrieve the webpage. Status code:", response.status_code)
-        exit()
+    # if response.status_code == 200:
+    #     html_content = response.text
+    # else:
+    #     print("Failed to retrieve the webpage. Status code:", response.status_code)
+    #     exit()
+
+    driver = webdriver.Chrome()
+    driver.get(url)
+    html_content = driver.page_source
+    driver.close()
 
     soup = BeautifulSoup(html_content, 'html.parser')
 
@@ -112,19 +132,24 @@ def get_shooting_history(
 
     root_dir = root_dir + ("/" if root_dir[-1] != "/" else "")
 
-    league_id = get_league_id(league_name) if league_name != "All-Comp" else ""
+    league_id = league_to_id_map[league_name] if league_name != "All-Comp" else ""
 
     base_url = "https://fbref.com"
     url = f"{base_url}/en/players/{player_id}/matchlogs/{season}/c{league_id}/"
     print(url)
 
-    response = requests.get(url)
+    driver = webdriver.Chrome()
+    driver.get(url)
+    html_content = driver.page_source
+    driver.close()
 
-    if response.status_code == 200:
-        html_content = response.text
-    else:
-        print("Failed to retrieve the webpage. Status code:", response.status_code)
-        exit()
+    # response = requests.get(url)
+
+    # if response.status_code == 200:
+    #     html_content = response.text
+    # else:
+    #     print("Failed to retrieve the webpage. Status code:", response.status_code)
+    #     exit()
 
     soup = BeautifulSoup(html_content, 'html.parser')
 
@@ -137,25 +162,49 @@ def get_shooting_history(
     matches_shots = []
     matches_minutes = []
     match_id = 1
+
+    file_dir = f"{root_dir}shots/{player_id}"
+    create_dir(file_dir)
+    file_dir = f"{file_dir}/{season}"
+    create_dir(file_dir)
+    file_path = f"{file_dir}/{league_name}.csv"
+
+    if os.path.exists(f"{file_dir}/minutes.csv"):
+        match_ids = get_match_ids(f"{file_dir}/minutes.csv")
+    else:
+        match_ids = set()
+
+    matches = [match for match in matches if match.select('td[data-stat="match_report"]') != []]
+    matches = [match for match in matches if match.select('td[data-stat="match_report"]')[0].select("a") != []]
+    matches = [match for match in matches if match.get("class") == None]
+
+    print(match_ids)
+
     for match in matches:
 
         match_cell = match.select('td[data-stat="match_report"]')
 
-        if match_cell == []:
-            continue
+        # if match_cell == []:
+        #     continue
 
         match_url = match_cell[0].select('a')
 
-        if match_url == []:
-            continue
+        # if match_url == []:
+        #     continue
 
 
         match_url= match_url[0].get("href")
         match_url = f"{base_url}{match_url}"
         match_code = match_url.split("/")[5]
-        print(match_url)
+        print(f"{match_id}) {match_url}")
 
-        match_shots, match_minutes = parse_shooting_table(match_url, match_code, player_id, match_id)
+        if match_code in match_ids:
+            match_id += 1
+            continue
+
+
+        match_shots, match_minutes = parse_shooting_table(driver, match_url, match_code, player_id, match_id)
+
         matches_shots.append(match_shots)
         matches_minutes.append(match_minutes)
 
@@ -163,22 +212,24 @@ def get_shooting_history(
 
     matches_shots = [shot_info for shots_info in matches_shots for shot_info in shots_info]
 
-    file_dir = f"{root_dir}shots/{player_id}"
-    create_dir(file_dir)
-    file_dir = f"{file_dir}/{season}"
-    create_dir(file_dir)
+    
 
     print(f"Saving {player_name} ({player_id}) shooting history for {league_name} {season} in {file_dir + '/'}")
-
-    file_path = f"{file_dir}/{league_name}.csv"
 
     file_content = "match_id,round,minutes,xg,xgot,scored,penalty\n"
     for match_code, match_id, minutes, gol, xg, xgot, penalty in matches_shots:
         shot_row = f"{match_code},{match_id},{minutes},{xg},{xgot},{'True' if gol else 'False'},{'True' if penalty else 'False'}\n"
         file_content += shot_row
 
-    with open(file_path, "w") as file:
-        file.write(file_content)
+    if os.path.exists(file_path):
+        new_data = pd.read_csv(io.StringIO(file_content))
+        old_data = pd.read_csv(file_path)
+        if not new_data.empty:
+            data = pd.concat([old_data, new_data])#.reset_index()
+            data.to_csv(file_path, index=False)
+    else:
+        with open(file_path, "w") as file:
+            file.write(file_content)
 
 
     file_content = "match_id,round,minutes_played\n"
@@ -189,9 +240,15 @@ def get_shooting_history(
     file_path = f"{file_dir}/minutes.csv"
 
 
-    with open(file_path, "w") as file:
-        file.write(file_content)
-
+    if os.path.exists(file_path):
+        new_data = pd.read_csv(io.StringIO(file_content))
+        old_data = pd.read_csv(file_path)
+        if not new_data.empty:
+            data = pd.concat([old_data, new_data])#.reset_index()
+            data.to_csv(file_path, index=False)
+    else:
+        with open(file_path, "w") as file:
+            file.write(file_content)
 
     player_name_file_path = f"{root_dir}shots/{player_id}/name"
     with open(player_name_file_path, "w") as file:

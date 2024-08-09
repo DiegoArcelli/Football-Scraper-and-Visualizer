@@ -1,24 +1,30 @@
 import os
 import pandas as pd
 
+national_tournaments = [676]
 
+'''
+list of admissible values for the the league argument
+'''
+admissible_leagues = [
+    "Serie-A",
+    "Premier-League",
+    "La-Liga",
+    "Bundesliga",
+    "Ligue-1",
+    "Champions-League",
+    "European-Championship"
+]
 
-def get_league_id(league_name):
-    if league_name == "Serie-A":
-        return 11
-    elif league_name == "Premier-League":
-        return 9
-    elif league_name == "La-Liga":
-        return 12
-    elif league_name == "Bundesliga":
-        return 20
-    elif league_name == "Ligue-1":
-        return 13
-    elif league_name == "Champions-League":
-        return 8
-    elif league_name == "European-Championship":
-        return 676
-  
+league_to_id_map = {
+    "Serie-A": 11,
+    "Premier-League": 9,
+    "La-Liga": 12,
+    "Bundesliga": 20,
+    "Ligue-1": 13,
+    "Champions-League": 8,
+    "European-Championship": 676
+}
 
 '''
 
@@ -36,3 +42,179 @@ def merge_data_frames(df_list, ref_col):
         merged_df = pd.merge(merged_df, df, on=ref_col, how='inner', suffixes=('', '_to_drop'))
         merged_df = merged_df[[col for col in merged_df.columns if not col.endswith("_to_drop")]]
     return merged_df    
+
+
+def get_teams_table(soup, league_id):
+
+    if league_id not in national_tournaments:
+        div = soup.select('div[id^="all_results"]')[-1]        
+    else:
+        div = soup.select('div[id^="all_stats_squads"]')[0]
+
+    table = div.select('table[class^="stats_table"]')[0].select('tbody')[0]
+    teams = table.select('tr')
+
+    return teams    
+
+
+def get_team_url(team, league_id, season, all_comps, matchlogs=False):
+
+    tag = "th" if league_id in national_tournaments else "td"
+    team_stats = team.select(f"{tag}[data-stat='team']")[0]
+
+    if  len(team_stats.select("a")) == 0:
+        return  None
+
+    '''
+    extract from the row the id of the team in the fbref database so that we can
+    rebuild the url of the team page
+    '''
+    team_info = team_stats.select("a")[0]
+    team_name = team_info.text
+    team_url = team_info.get("href")
+    url_compontens = team_url.split("/")
+    team_id = url_compontens[3]
+    league_id_item = "all_comps" if all_comps else f"c{league_id}"
+
+    if matchlogs:
+        team_url = f"https://fbref.com/en/squads/{team_id}/{season}/{league_id_item}/matchlogs/Scores-and-Fixtures"
+    else:
+        team_url = f"https://fbref.com/en/squads/{team_id}/{season}/{league_id_item}/Stats"
+    
+    return team_url, team_name, team_id
+
+
+'''
+Arguments:
+- table: the html code of the data table to parse
+- team_name: the name of the team of which we want to scrape the data
+- all_comps: boolean argument. If it is set to false the function will only download the data realtive
+  to the games played in the league. If it is set to true the function will download the data relative
+  to the games played in all the competitions of the season
+'''
+def parse_table(
+    table,
+    team_name,
+    team_id,
+    all_comps=False,
+    return_opponent=True
+):
+
+    # dictionaries which will contains the data of the players, the team and the opponents
+    players_stats = {}
+    team_stats = {}
+    opponent_stats = {}
+
+    '''
+    extracting the header of the table (which contains the names of the attributes) and the body of the 
+    table that contains the values of the 
+    '''
+    table_header = table.select('thead')[0]
+    table_body = table.select('tbody')[0]
+    if not all_comps:
+        table_foot = table.select('tfoot')[0]
+
+    players = table_body.select('tr[data-row]')
+
+    col_names = table_header.select('tr')[1].select('th')
+    # attributes_names = []
+    attributes_keys = []
+
+    attribute_names_map = {}
+
+    players_stats["player_id"] = []
+    players_stats["team"] = []
+    players_stats["team_id"] = []
+
+    for col_name in col_names:
+        attribute_name = col_name.get('aria-label')
+        attribute_key = col_name.get('data-stat')
+
+        if attribute_key == "matches":
+            continue
+
+        # attributes_names.append(attribute_name)
+        attributes_keys.append(attribute_key)
+        attribute_names_map[attribute_key] = attribute_name
+        
+        players_stats[attribute_key] = []
+
+        if attribute_name not in ["Player", "Nation", "Position"]:
+            team_stats[attribute_key] = []
+            if return_opponent:
+                opponent_stats[attribute_key] = []
+
+
+    # get players stats
+    for player in players:
+        # player_id = player.select('th')[0].get("data-append-csv")
+        if len(player.select('a')) > 0:
+            player_id = player.select('th')[0].get("data-append-csv")
+            player_name = player.select('a')[0].text
+
+            # print(player_id, player_name)
+            players_stats["player_id"].append(player_id)
+            players_stats["player"].append(player_name)
+            players_stats["team"].append(team_name)
+            players_stats["team_id"].append(team_id)
+
+            stats = player.select("td")
+            for stat in stats:
+
+                stat_text = stat.text
+
+                if stat_text == "Matches":
+                    continue
+
+                if stat_text == "":
+                    stat_text = None
+
+                attribute = stat.get('data-stat')
+                players_stats[attribute].append(stat_text)
+
+    if all_comps:
+        return players_stats
+
+    if not all_comps:
+
+        # get team stats
+        squad_stats = table_foot.select('tr')[0].select('td')
+        team_stats["team"] = [team_name]
+        team_stats["team_id"] = [team_id]
+        for stat in squad_stats:
+
+            attribute = stat.get('data-stat')
+            if attribute in ["nationality", "position", "matches"]:
+                continue
+
+            stat_text = stat.text
+
+            if stat_text == "":
+                stat_text = None
+
+            
+            team_stats[attribute].append(stat_text)
+
+        if return_opponent:
+            opp_stats = table_foot.select('tr')[1].select('td')
+            opponent_stats["team"] = [team_name]
+            opponent_stats["team_id"] = [team_id]
+            for stat in opp_stats:
+
+                attribute = stat.get('data-stat')
+                if attribute in ["nationality", "position", "matches"]:
+                    continue
+
+                stat_text = stat.text
+
+                if stat_text == "":
+                    stat_text = None
+
+                opponent_stats[attribute].append(stat_text)
+
+        if return_opponent:
+            return players_stats, team_stats, opponent_stats
+
+        return players_stats, team_stats
+
+    return players_stats

@@ -3,155 +3,17 @@ from bs4 import BeautifulSoup
 from requests_html import HTMLSession
 import pandas as pd
 from pyppeteer.errors import TimeoutError, BrowserError
-from .utils import create_dir, get_league_id, merge_data_frames
+from .utils import *
 import time
-
-
-national_tournaments = [676]
-
-'''
-list of admissible values for the the league argument
-'''
-admissible_leagues = [
-    "Serie-A",
-    "Premier-League",
-    "La-Liga",
-    "Bundesliga",
-    "Ligue-1",
-    "Champions-League",
-    "European-Championship"
-]
-
-
-
-'''
-Function to read a table of statistics of a given team
-
-Arguments:
-- table: the html code of the data table to parse
-- team_name: the name of the team of which we want to scrape the data
-- all_comps: boolean argument. If it is set to false the function will only download the data realtive
-  to the games played in the league. If it is set to true the function will download the data relative
-  to the games played in all the competitions of the season
-'''
-def parse_table(
-    table,
-    team_name,
-    team_id,
-    all_comps
-):
-
-    # dictionaries which will contains the data of the players, the team and the opponents
-    players_stats = {}
-    team_stats = {}
-    opponent_stats = {}
-
-    '''
-    extracting the header of the table (which contains the names of the attributes) and the body of the 
-    table that contains the values of the 
-    '''
-    table_header = table.select('thead')[0]
-    table_body = table.select('tbody')[0]
-    if not all_comps:
-        table_foot = table.select('tfoot')[0]
-
-    players = table_body.select('tr[data-row]')
-
-    col_names = table_header.select('tr')[1].select('th')
-    # attributes_names = []
-    attributes_keys = []
-
-    attribute_names_map = {}
-
-    players_stats["player_id"] = []
-    players_stats["team"] = []
-    players_stats["team_id"] = []
-
-    for col_name in col_names:
-        attribute_name = col_name.get('aria-label')
-        attribute_key = col_name.get('data-stat')
-
-        if attribute_key == "matches":
-            continue
-
-        # attributes_names.append(attribute_name)
-        attributes_keys.append(attribute_key)
-        attribute_names_map[attribute_key] = attribute_name
-        
-        players_stats[attribute_key] = []
-
-        if attribute_name not in ["Player", "Nation", "Position"]:
-            team_stats[attribute_key] = []
-            opponent_stats[attribute_key] = []
-
-
-    # get players stats
-    for player in players:
-        # player_id = player.select('th')[0].get("data-append-csv")
-        if len(player.select('a')) > 0:
-            player_id = player.select('th')[0].get("data-append-csv")
-            player_name = player.select('a')[0].text
-
-            # print(player_id, player_name)
-            players_stats["player_id"].append(player_id)
-            players_stats["player"].append(player_name)
-            players_stats["team"].append(team_name)
-            players_stats["team_id"].append(team_id)
-
-            stats = player.select("td")
-            for stat in stats:
-
-                stat_text = stat.text
-
-                if stat_text == "Matches":
-                    continue
-
-                if stat_text == "":
-                    stat_text = None
-
-                attribute = stat.get('data-stat')
-                players_stats[attribute].append(stat_text)
-
-    if not all_comps:
-
-        # get team stats
-        squad_stats = table_foot.select('tr')[0].select('td')
-        team_stats["team"] = [team_name]
-        team_stats["team_id"] = [team_id]
-        for stat in squad_stats:
-
-            attribute = stat.get('data-stat')
-            if attribute in ["nationality", "position", "matches"]:
-                continue
-
-            stat_text = stat.text
-
-            if stat_text == "":
-                stat_text = None
-
-            
-            team_stats[attribute].append(stat_text)
-
-        opp_stats = table_foot.select('tr')[1].select('td')
-        opponent_stats["team"] = [team_name]
-        opponent_stats["team_id"] = [team_id]
-        for stat in opp_stats:
-
-            attribute = stat.get('data-stat')
-            if attribute in ["nationality", "position", "matches"]:
-                continue
-
-            stat_text = stat.text
-
-            if stat_text == "":
-                stat_text = None
-
-            opponent_stats[attribute].append(stat_text)
-
-    
-        return players_stats, team_stats, opponent_stats
-
-    return players_stats
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 
 '''
 Function to extract data of a given team
@@ -166,6 +28,7 @@ Arguments:
   to the games played in all the competitions of the season
 '''
 def get_team_data(
+        driver,
         team : str,
         team_id : str,
         team_url : str, 
@@ -179,20 +42,26 @@ def get_team_data(
     team_dir = f"{league_dir}{dir_name}/"
     create_dir(team_dir)
 
-    session = HTMLSession()
 
-    # download the html page containing the stats of the team
-    is_page_dowloaded = False
-    while not is_page_dowloaded:
-        try:
-            r = session.get(team_url)
-            r.html.render()  # this call executes the js in the page
-            is_page_dowloaded = True
-        except (TimeoutError, BrowserError):
-           print("Retrying download")
-           is_page_dowloaded = False 
+    driver = webdriver.Chrome()
+    driver.get(team_url)
+    html_content = driver.page_source
+    driver.close()
+
+    # session = HTMLSession()
+
+    # # download the html page containing the stats of the team
+    # is_page_dowloaded = False
+    # while not is_page_dowloaded:
+    #     try:
+    #         r = session.get(team_url)
+    #         r.html.render()  # this call executes the js in the page
+    #         is_page_dowloaded = True
+    #     except (TimeoutError, BrowserError):
+    #        print("Retrying download")
+    #        is_page_dowloaded = False 
             
-    html_content = r.html.html
+    # html_content = r.html.html
     # print(html_content)
     soup = BeautifulSoup(html_content, 'html.parser')
 
@@ -230,7 +99,7 @@ def get_team_data(
         table = soup.select(f"table#{table_name}")[0]
 
         if not all_comps:
-            players_stats, team_stats, opponent_stats = parse_table(table, team, team_id, all_comps)
+            players_stats, team_stats, opponent_stats = parse_table(table, team, team_id, all_comps, True)
             players_df = pd.DataFrame.from_dict(players_stats)
             team_df = pd.DataFrame.from_dict(team_stats)
             opponent_df = pd.DataFrame.from_dict(opponent_stats)
@@ -238,7 +107,7 @@ def get_team_data(
             team_tables.append(team_df)
             opponent_table.append(opponent_df)
         else:
-            players_stats = parse_table(table, team, team_id, all_comps)
+            players_stats = parse_table(table, team, team_id, all_comps, True)
             players_df = pd.DataFrame.from_dict(players_stats)
             players_tables.append(players_df)
 
@@ -247,7 +116,7 @@ def get_team_data(
         table = soup.select(f"table#{gk_table_name}")[0]
 
         if not all_comps:
-            gk_stats, team_stats, opponent_stats = parse_table(table, team, team_id, all_comps)
+            gk_stats, team_stats, opponent_stats = parse_table(table, team, team_id, all_comps, True)
             gk_df = pd.DataFrame.from_dict(gk_stats)
             team_df = pd.DataFrame.from_dict(team_stats)
             opponent_df = pd.DataFrame.from_dict(opponent_stats)
@@ -256,7 +125,7 @@ def get_team_data(
             team_tables.append(team_df)
             opponent_table.append(opponent_df)
         else:
-            gk_stats = parse_table(table, team, team_id, all_comps)
+            gk_stats = parse_table(table, team, team_id, all_comps, True)
             gk_df = pd.DataFrame.from_dict(gk_stats)
             gk_tables.append(gk_df)
 
@@ -348,7 +217,7 @@ def get_league_data(
     create_dir(league_dir)
 
     # get the id of the league of which to download the data 
-    league_id = get_league_id(league_name)
+    league_id = league_to_id_map[league_name]
 
     # definition of the fbref url containing the data of the league
     base_url = "https://fbref.com"
@@ -360,54 +229,25 @@ def get_league_data(
 
     print(f"Downloading {league_name} {season} data")
     print(url)
-    response = requests.get(url)
 
-
-    # downloading the html page containing the league data
-    if response.status_code == 200:
-        html_content = response.text
-    else:
-        print("Failed to retrieve the webpage. Status code:", response.status_code)
-        exit()
+    driver = webdriver.Chrome()
+    driver.get(url)
+    html_content = driver.page_source
+    driver.close()
 
     # we extract from the html page of the the table containing a list of all the teams of the league
     soup = BeautifulSoup(html_content, 'html.parser')
-    if league_id not in national_tournaments:
-        div = soup.select('div[id^="all_results"]')[-1]
-        table = div.select('table[class^="stats_table"]')[0].select('tbody')[0]
-        teams = table.select('tr')
-    else:
-        div = soup.select('div[id^="all_stats_squads"]')[0]
-        table = div.select('table[class^="stats_table"]')[0].select('tbody')[0]
-        teams = table.select('tr')[1:]        
+    teams = get_teams_table(soup, league_id)  
 
     # iterate through each row of the table
     for team in teams:
         
-        if league_id not in national_tournaments:
-            team_stats = team.select('td[data-stat="team"]')[0]
-        else:
-            team_stats = team.select('th[data-stat="team"]')[0]
-
-        if  len(team_stats.select("a")) == 0:
+        output = get_team_url(team, league_id, season, all_comps, False)
+        if output is None:
             continue
 
-        '''
-        extract from the row the id of the team in the fbref database so that we can
-        rebuild the url of the team page
-        '''
-        team_info = team_stats.select("a")[0]
-        team_name = team_info.text
-        team_url = team_info.get("href")
-        team_id = team_url.split("/")[3]
-        team_url_components = team_url.split("/")
-        ref_pos = team_url_components.index("squads", 0, len(team_url_components)) + 2
-        url_league_id = "all_comps" if all_comps else f"c{league_id}"
-        team_url_components = team_url_components[:ref_pos] + [season, url_league_id] + team_url_components[ref_pos:]
-        team_url = base_url + "/".join(team_url_components) + f"-{league_name}"
-        
+        team_url, team_name, team_id = output
         print(f"\n{team_url}")
-        # we call the function to extract the data of the team
-        get_team_data(team_name, team_id, team_url, league_dir, league_id, all_comps)
-        
+
+        get_team_data(driver, team_name, team_id, team_url, league_dir, league_id, all_comps)        
         time.sleep(3)

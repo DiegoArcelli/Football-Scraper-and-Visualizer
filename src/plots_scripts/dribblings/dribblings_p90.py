@@ -3,7 +3,9 @@ import plotly.express as px
 import pandas as pd
 import plotly.graph_objects as go
 import argparse
-from utils import scatter_plot
+import sys
+sys.path.append("./../")
+from utils import *
 
 parser = argparse.ArgumentParser(description='.')
 parser.add_argument('--league', default="", type=str)
@@ -45,18 +47,19 @@ players_to_show = [
 # else:
 #     data_path = f"./../../datasets/{season}/players.csv"
 
-data_path = f"./../../datasets/{season}{f'/All-Competitions' if all_comps else ''}{f'/{league}' if league != '' else ''}/players.csv"
+data_path = f"./../../../datasets/{season}{f'/All-Competitions' if all_comps else ''}{f'/{league}' if league != '' else ''}/players.csv"
 
 print(data_path)
 
 data = pd.read_csv(data_path)
-data = data[["player_id", "player", "minutes", "take_ons_won", "take_ons_won_pct", "touches"]]
+data = data[["nationality", "player_id", "player", "minutes", "take_ons_won", "take_ons_won_pct", "touches"]]
 
 if data["minutes"].dtype != "int64":
     data["minutes"] = data["minutes"].apply(lambda x: int(x.replace(",", ""))).astype("int64")
 
 data = data[data["minutes"] >= threshold_minutes]
 data = data[data["take_ons_won"] >= threshold_take_ons]
+data = data[data["nationality"] == "eng ENG"]
 
 # takes_on_stats.replace(to_replace=None, value=0)
 take_ons_won = data["take_ons_won"]

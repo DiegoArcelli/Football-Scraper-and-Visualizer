@@ -23,7 +23,75 @@ def parse_minute(minute):
     return int(minute) + int(extra)
 
 
-def parse_event_panel(soup, venue, first_half_minutes, second_half_minutes):
+
+def compute_half_game_state(
+        goals_minute,
+        ref_minute="1",
+        home_goals=0,
+        away_goals=0,
+        start_state="draw"
+    ):
+
+    def check_interval(minute, lower, upper):
+        minute = int(minute.split("+")[0])
+        lower = int(lower)
+        upper = int(upper)
+
+        if minute >= lower and minute <= upper:
+            return True
+
+        return False
+
+    assert ref_minute in ["1", "46", "91", "106"], "Error"
+
+    
+    if ref_minute == "1":
+        period = "first_half"; last_minute=45
+    elif ref_minute == "46":
+        period = "second_half"; last_minute=90
+    elif ref_minute == "91":
+        period = "first_half_overtime"; last_minute=105
+    elif ref_minute == "106":
+        period = "first_half_overtime"; last_minute=120
+
+    # goals_minute = [venue, minute for venue, minute in goals_minute if minute.split("+")[0] >= int(ref_minute) and minute.split("+")[0] <= last_minute]
+    goals_minute = [(venue, minute) for (venue, minute) in goals_minute if check_interval(minute, ref_minute, last_minute)]
+
+    # if goals_minute == []:
+    #     return None
+
+    # ref_minute = 1
+    # state = "draw"
+    states = []
+    state = start_state
+
+    for team, minute in goals_minute:
+
+        if team == "home":
+            home_goals += 1
+        else:
+            away_goals += 1
+
+        if home_goals > away_goals:
+            new_state = "win"
+        elif home_goals < away_goals:
+            new_state = "lose"
+        else:
+            new_state = "draw"
+
+        if new_state != state:
+            #minutes_in_state = minute - ref_minute
+            states.append((period, ref_minute, minute, state))
+            state = new_state
+            ref_minute = minute
+    
+    states.append(("second", ref_minute, f"{period}_end", state))
+        
+    return states, home_goals, away_goals, state
+
+
+
+def parse_event_panel(soup, venue):
 
     class Minute:
 
@@ -54,14 +122,6 @@ def parse_event_panel(soup, venue, first_half_minutes, second_half_minutes):
                 return x_extra > y_extra
 
             return x_min > y_min
-
-
-    def is_first_half(minute):
-        if "+" not in minute and int(minute) <= 45:
-            return True
-        if "+" in minute and int(minute.split("+")[0]) <= 45:
-            return True
-        return False
 
 
     scorebox = soup.select("div[class='scorebox']")[0]
@@ -96,63 +156,24 @@ def parse_event_panel(soup, venue, first_half_minutes, second_half_minutes):
     goals_minute = sorted(goals_minute, key=lambda x: x[1])
     goals_minute = [(venue, m.minute) for venue, m in goals_minute]    
 
-    minutes = [minute for _, minute in goals_minute]
-    first_half_max = [minute for minute in minutes if minute[:2] == "45"]
-    second_half_max = [minute for minute in minutes if minute[:2] == "90"]
-    first_half_max = "45" if first_half_max == [] else first_half_max[-1]
-    second_half_max = "90" if second_half_max == [] else second_half_max[-1]
-    first_half_minutes = first_half_minutes if parse_minute(first_half_minutes) > parse_minute(first_half_max) else first_half_max
-    second_half_minutes = second_half_minutes if parse_minute(second_half_minutes) > parse_minute(second_half_max) else second_half_max
-    # full_minutes = second_half_extra + 90
-    # exit()
-
-    home_goals, away_goals = 0, 0
-    ref_minute = 1
-    state = "draw"
+    home_goals = 0; away_goals = 0; state = "draw"
     states = []
-    first_half = True
 
-    # print(goals_minute)
+    for ref_minute in ["1", "46", "91", "106"]:
+        output = compute_half_game_state(
+            goals_minute=goals_minute,
+            ref_minute=ref_minute,
+            home_goals=home_goals,
+            away_goals=away_goals,
+            start_state=state
+        )
 
-    for team, minute in goals_minute:
-        if first_half and not is_first_half(minute):
-            if states == []:
-                states.append(("first", ref_minute, first_half_minutes, state))
-            else:
-                _, old_start, old_end, old_state = states[-1]
-                states.append(("first", old_end, first_half_minutes, new_state))
-                # states.append((old_end, first_half_minutes, old_state))
-            first_half = False
-            ref_minute = "46"
+        if output is None:
+            break
 
+        half_states, home_goals, away_goals, state = output
+        states = states + half_states
 
-        if team == "home":
-            home_goals += 1
-        else:
-            away_goals += 1
-
-        if home_goals > away_goals:
-            new_state = "win"
-        elif home_goals < away_goals:
-            new_state = "lose"
-        else:
-            new_state = "draw"
-
-
-        if new_state != state:
-            #minutes_in_state = minute - ref_minute
-            states.append(("first" if first_half else "second", ref_minute, minute, state))
-            state = new_state
-            ref_minute = minute
-        
-    #minutes_in_state = full_minutes - ref_minute
-    _, last_start, last_end, last_state = states[-1]
-    # case in which there have been no goals in the second half
-    if is_first_half(ref_minute):
-        states.append(("first", last_end, first_half_minutes, state))
-        ref_minute = "46"
-    states.append(("second", ref_minute, second_half_minutes, state))
-        
     return states
 
 
@@ -182,23 +203,25 @@ def parse_shooting_table(soup, team_id, venue):
 
         match_shots_info.append((minute, team, player_name, shot_player_id, outcome, xg, xgot, penalty))
 
-    minutes = list(map(lambda x: x[0], match_shots_info))
-    first_half_minute = [minute for minute in minutes if minute[:2] == "45"]
-    second_half_minute = [minute for minute in minutes if minute[:2] == "90"]
-    first_half_minutes = "45" if first_half_minute == [] else first_half_minute[-1]
-    second_half_minutes = "90" if second_half_minute == [] else second_half_minute[-1]
+    # minutes = list(map(lambda x: x[0], match_shots_info))
+    # first_half_minute = [minute for minute in minutes if minute[:2] == "45"]
+    # second_half_minute = [minute for minute in minutes if minute[:2] == "90"]
+    # first_half_minutes = "45" if first_half_minute == [] else first_half_minute[-1]
+    # second_half_minutes = "90" if second_half_minute == [] else second_half_minute[-1]
 
-    game_states = parse_event_panel(soup, venue, first_half_minutes, second_half_minutes)
+    game_states = parse_event_panel(soup, venue)
 
     return match_shots_info, game_states
     
 
 url = "https://fbref.com/en/matches/e70ac4b1/Internazionale-Sassuolo-September-27-2023-Serie-A"
-url = "https://fbref.com/en/partite/254420f7/Internazionale-Monza-19-Agosto-2023-Serie-A"
-url = "https://fbref.com/en/matches/eb1af48a/Juventus-Lecce-September-26-2023-Serie-A"
-url = "https://fbref.com/en/matches/14cf8fd1/Sassuolo-Juventus-September-23-2023-Serie-A"
-url = "https://fbref.com/en/matches/8b6e8a62/Udinese-Juventus-August-20-2023-Serie-A"
-url = "https://fbref.com/en/matches/ce6440ec/Genoa-Internazionale-December-29-2023-Serie-A"
+# url = "https://fbref.com/en/partite/254420f7/Internazionale-Monza-19-Agosto-2023-Serie-A"
+# url = "https://fbref.com/en/matches/eb1af48a/Juventus-Lecce-September-26-2023-Serie-A"
+# url = "https://fbref.com/en/matches/14cf8fd1/Sassuolo-Juventus-September-23-2023-Serie-A"
+# url = "https://fbref.com/en/matches/8b6e8a62/Udinese-Juventus-August-20-2023-Serie-A"
+# url = "https://fbref.com/en/matches/ce6440ec/Genoa-Internazionale-December-29-2023-Serie-A"
+# url = "https://fbref.com/en/matches/b0d9b0e1/Manchester-City-Real-Madrid-April-17-2024-Champions-League"
+# url = "https://fbref.com/en/partite/7140acae/Argentina-France-18-Dicembre-2022-World-Cup"
 
 response = requests.get(url)
 print(url)

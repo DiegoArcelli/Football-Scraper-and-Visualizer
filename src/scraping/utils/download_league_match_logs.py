@@ -9,118 +9,15 @@ import os
 import re
 import copy
 
-
-'''
-Function to read a table of statistics of a given team
-
-Arguments:
-- table: the html code of the data table to parse
-- team_name: the name of the team of which we want to scrape the data
-- all_comps: boolean argument. If it is set to false the function will only download the data realtive
-  to the games played in the league. If it is set to true the function will download the data relative
-  to the games played in all the competitions of the season
-'''
-def parse_table(
-    table,
-    team_name,
-    team_id,
-    all_comps
-):
-
-    # dictionaries which will contains the data of the players, the team and the opponents
-    players_stats = {}
-    team_stats = {}
-
-    '''
-    extracting the header of the table (which contains the names of the attributes) and the body of the 
-    table that contains the values of the 
-    '''
-    table_header = table.select('thead')[0]
-    table_body = table.select('tbody')[0]
-    if not all_comps:
-        table_foot = table.select('tfoot')[0]
-
-    players = table_body.select('tr[data-row]')
-
-    col_names = table_header.select('tr')[1].select('th')
-    # attributes_names = []
-    attributes_keys = []
-
-    attribute_names_map = {}
-
-    players_stats["player_id"] = []
-    players_stats["team"] = []
-    players_stats["team_id"] = []
-
-    for col_name in col_names:
-        attribute_name = col_name.get('aria-label')
-        attribute_key = col_name.get('data-stat')
-
-        if attribute_key == "matches":
-            continue
-
-        # attributes_names.append(attribute_name)
-        attributes_keys.append(attribute_key)
-        attribute_names_map[attribute_key] = attribute_name
-        
-        players_stats[attribute_key] = []
-
-        if attribute_name not in ["Player", "Nation", "Position"]:
-            team_stats[attribute_key] = []
-
-
-    # get players stats
-    for player in players:
-        # player_id = player.select('th')[0].get("data-append-csv")
-        if len(player.select('a')) > 0:
-            player_id = player.select('th')[0].get("data-append-csv")
-            player_name = player.select('a')[0].text
-
-            # print(player_id, player_name)
-            players_stats["player_id"].append(player_id)
-            players_stats["player"].append(player_name)
-            players_stats["team"].append(team_name)
-            players_stats["team_id"].append(team_id)
-
-            stats = player.select("td")
-            for stat in stats:
-
-                stat_text = stat.text
-
-                if stat_text == "Matches":
-                    continue
-
-                if stat_text == "":
-                    stat_text = None
-
-                attribute = stat.get('data-stat')
-                players_stats[attribute].append(stat_text)
-
-    if not all_comps:
-
-        # get team stats
-        squad_stats = table_foot.select('tr')[0].select('td')
-        team_stats["team"] = [team_name]
-        team_stats["team_id"] = [team_id]
-        for stat in squad_stats:
-
-            attribute = stat.get('data-stat')
-            if attribute in ["nationality", "position", "matches"]:
-                continue
-
-            stat_text = stat.text
-
-            if stat_text == "":
-                stat_text = None
-
-            
-            team_stats[attribute].append(stat_text)
-
-    
-        return players_stats, team_stats
-
-    return players_stats
-
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 def parse_minute(minute):
@@ -203,8 +100,8 @@ def get_match_info_tables(soup, team, team_id, opponent_name, opponent_id, venue
         home_table = tables[team_idx]
         opp_table = tables[opp_idx]
 
-        team_player_stats, team_stats = parse_table(home_table, team, team_id, False)
-        opponent_player_stats, opp_stats = parse_table(opp_table, opponent_name, opponent_id, False)
+        team_player_stats, team_stats = parse_table(home_table, team, team_id, False, False)
+        opponent_player_stats, opp_stats = parse_table(opp_table, opponent_name, opponent_id, False, False)
 
 
 
@@ -219,16 +116,82 @@ def get_match_info_tables(soup, team, team_id, opponent_name, opponent_id, venue
     tables = soup.find_all('table', id=pattern)
     home_table = tables[team_idx]
     opp_table = tables[opp_idx]
-    team_gk_stats = parse_table(home_table, team, team_id, True)
-    opponent_gk_stats = parse_table(opp_table, opponent_name, opponent_id, True)
+    team_gk_stats = parse_table(home_table, team, team_id, True, False)
+    opponent_gk_stats = parse_table(opp_table, opponent_name, opponent_id, True, False)
     df_team_gk_stats = pd.DataFrame.from_dict(team_gk_stats)
     df_opponent_gk_stats = pd.DataFrame.from_dict(opponent_gk_stats)
     # dataframes.append(("gk", team_player_stats, None, opponent_player_stats, None))
 
     return dfs_team_players_stats, dfs_opponent_players_stats, dfs_team_stats, dfs_opponent_stats, df_team_gk_stats, df_opponent_gk_stats
 
+def compute_half_game_state(
+        goals_minute,
+        ref_minute="1",
+        home_goals=0,
+        away_goals=0,
+        start_state="draw"
+    ):
 
-def parse_event_panel(soup, venue, first_half_minutes, second_half_minutes):
+    def check_interval(minute, lower, upper):
+        minute = int(minute.split("+")[0])
+        lower = int(lower)
+        upper = int(upper)
+
+        if minute >= lower and minute <= upper:
+            return True
+
+        return False
+
+    assert ref_minute in ["1", "46", "91", "106"], "Error"
+
+    
+    if ref_minute == "1":
+        period = "first_half"; last_minute=45
+    elif ref_minute == "46":
+        period = "second_half"; last_minute=90
+    elif ref_minute == "91":
+        period = "first_half_overtime"; last_minute=105
+    elif ref_minute == "106":
+        period = "first_half_overtime"; last_minute=120
+
+    # goals_minute = [venue, minute for venue, minute in goals_minute if minute.split("+")[0] >= int(ref_minute) and minute.split("+")[0] <= last_minute]
+    goals_minute = [(venue, minute) for (venue, minute) in goals_minute if check_interval(minute, ref_minute, last_minute)]
+
+    # if goals_minute == []:
+    #     return None
+
+    # ref_minute = 1
+    # state = "draw"
+    states = []
+    state = start_state
+
+    for team, minute in goals_minute:
+
+        if team == "home":
+            home_goals += 1
+        else:
+            away_goals += 1
+
+        if home_goals > away_goals:
+            new_state = "win"
+        elif home_goals < away_goals:
+            new_state = "lose"
+        else:
+            new_state = "draw"
+
+        if new_state != state:
+            #minutes_in_state = minute - ref_minute
+            states.append((period, ref_minute, minute, state))
+            state = new_state
+            ref_minute = minute
+    
+    states.append(("second", ref_minute, f"{period}_end", state))
+        
+    return states, home_goals, away_goals, state
+
+
+
+def parse_event_panel(soup, venue):
 
     class Minute:
 
@@ -259,14 +222,6 @@ def parse_event_panel(soup, venue, first_half_minutes, second_half_minutes):
                 return x_extra > y_extra
 
             return x_min > y_min
-
-
-    def is_first_half(minute):
-        if "+" not in minute and int(minute) <= 45:
-            return True
-        if "+" in minute and int(minute.split("+")[0]) <= 45:
-            return True
-        return False
 
 
     scorebox = soup.select("div[class='scorebox']")[0]
@@ -301,64 +256,26 @@ def parse_event_panel(soup, venue, first_half_minutes, second_half_minutes):
     goals_minute = sorted(goals_minute, key=lambda x: x[1])
     goals_minute = [(venue, m.minute) for venue, m in goals_minute]    
 
-    minutes = [minute for _, minute in goals_minute]
-    first_half_max = [minute for minute in minutes if minute[:2] == "45"]
-    second_half_max = [minute for minute in minutes if minute[:2] == "90"]
-    first_half_max = "45" if first_half_max == [] else first_half_max[-1]
-    second_half_max = "90" if second_half_max == [] else second_half_max[-1]
-    first_half_minutes = first_half_minutes if parse_minute(first_half_minutes) > parse_minute(first_half_max) else first_half_max
-    second_half_minutes = second_half_minutes if parse_minute(second_half_minutes) > parse_minute(second_half_max) else second_half_max
-    # full_minutes = second_half_extra + 90
-    # exit()
-
-    home_goals, away_goals = 0, 0
-    ref_minute = 1
-    state = "draw"
+    home_goals = 0; away_goals = 0; state = "draw"
     states = []
-    first_half = True
 
-    # print(goals_minute)
+    for ref_minute in ["1", "46", "91", "106"]:
+        output = compute_half_game_state(
+            goals_minute=goals_minute,
+            ref_minute=ref_minute,
+            home_goals=home_goals,
+            away_goals=away_goals,
+            start_state=state
+        )
 
-    for team, minute in goals_minute:
-        if first_half and not is_first_half(minute):
-            if states == []:
-                states.append(("first", ref_minute, first_half_minutes, state))
-            else:
-                _, old_start, old_end, old_state = states[-1]
-                states.append(("first", old_end, first_half_minutes, new_state))
-                # states.append((old_end, first_half_minutes, old_state))
-            first_half = False
-            ref_minute = "46"
+        if output is None:
+            break
 
+        half_states, home_goals, away_goals, state = output
+        states = states + half_states
 
-        if team == "home":
-            home_goals += 1
-        else:
-            away_goals += 1
-
-        if home_goals > away_goals:
-            new_state = "win"
-        elif home_goals < away_goals:
-            new_state = "lose"
-        else:
-            new_state = "draw"
-
-
-        if new_state != state:
-            #minutes_in_state = minute - ref_minute
-            states.append(("first" if first_half else "second", ref_minute, minute, state))
-            state = new_state
-            ref_minute = minute
-        
-    #minutes_in_state = full_minutes - ref_minute
-    _, last_start, last_end, last_state = states[-1]
-    # case in which there have been no goals in the second half
-    if is_first_half(ref_minute):
-        states.append(("first", last_end, first_half_minutes, state))
-        ref_minute = "46"
-    states.append(("second", ref_minute, second_half_minutes, state))
-        
     return states
+
 
 
 def parse_shooting_table(soup, team_id, venue):
@@ -386,38 +303,28 @@ def parse_shooting_table(soup, team_id, venue):
 
         match_shots_info.append((minute, team, player_name, shot_player_id, outcome, xg, xgot, penalty))
 
-    minutes = list(map(lambda x: x[0], match_shots_info))
-    first_half_minute = [minute for minute in minutes if minute[:2] == "45"]
-    second_half_minute = [minute for minute in minutes if minute[:2] == "90"]
-    first_half_minutes = "45" if first_half_minute == [] else first_half_minute[-1]
-    second_half_minutes = "90" if second_half_minute == [] else second_half_minute[-1]
+    # minutes = list(map(lambda x: x[0], match_shots_info))
+    # first_half_minute = [minute for minute in minutes if minute[:2] == "45"]
+    # second_half_minute = [minute for minute in minutes if minute[:2] == "90"]
+    # first_half_minutes = "45" if first_half_minute == [] else first_half_minute[-1]
+    # second_half_minutes = "90" if second_half_minute == [] else second_half_minute[-1]
 
-    game_states = parse_event_panel(soup, venue, first_half_minutes, second_half_minutes)
+    game_states = parse_event_panel(soup, venue)
 
     return match_shots_info, game_states
     
 
-def parse_match_table(team, team_url, team_id, league_dir):
+def parse_match_table(driver, team, team_url, team_id, league_dir):
 
     dir_name = team.replace(" ", "-")
     team_dir = f"{league_dir}{dir_name}/matchlogs/"
     create_dir(team_dir)
 
-    session = HTMLSession()
-    
-    is_page_dowloaded = False
-    print(team_url)
-    while not is_page_dowloaded:
-        try:
-            r = session.get(team_url)
-            r.html.render()  # this call executes the js in the page
-            is_page_dowloaded = True
-        except (TimeoutError, BrowserError):
-           print("Retrying download")
-           is_page_dowloaded = False 
-            
-    html_content = r.html.html
-    # print(html_content)
+    driver = webdriver.Chrome()
+    driver.get(team_url)
+    html_content = driver.page_source
+    driver.close()
+
     soup = BeautifulSoup(html_content, 'html.parser')
 
     match_table = soup.select('table[id^="matchlogs"]')[0]
@@ -429,6 +336,8 @@ def parse_match_table(team, team_url, team_id, league_dir):
     # for match in matches:
     #     print(match)
     # exit()
+
+    matches = [match for match in matches if match.select('td[data-stat="match_report"]') != []]
 
     for match in matches:
 
@@ -444,9 +353,8 @@ def parse_match_table(team, team_url, team_id, league_dir):
             continue
 
         match_cell = match.select('td[data-stat="match_report"]')
-        if match_cell == []:
-            continue
-
+        # if match_cell == []:
+        #     continue
 
         match_report = match_cell[0].select("a")[0].text
         # match_report = match.select('td[data-stat="match_report"]')[0].select("a")[0].text
@@ -467,17 +375,22 @@ def parse_match_table(team, team_url, team_id, league_dir):
 
         print(match_url)
 
-        is_page_dowloaded = False
-        while not is_page_dowloaded:
-            try:
-                r = session.get(match_url)
-                r.html.render()  # this call executes the js in the page
-                is_page_dowloaded = True
-            except (TimeoutError, BrowserError):
-                print("Retrying download")
-                is_page_dowloaded = False 
+        driver = webdriver.Chrome()
+        driver.get(match_url)
+        html_content = driver.page_source
+        driver.close()
+
+        # is_page_dowloaded = False
+        # while not is_page_dowloaded:
+        #     try:
+        #         r = session.get(match_url)
+        #         r.html.render()  # this call executes the js in the page
+        #         is_page_dowloaded = True
+        #     except (TimeoutError, BrowserError):
+        #         print("Retrying download")
+        #         is_page_dowloaded = False 
                 
-        html_content = r.html.html
+        # html_content = r.html.html
         match_soup = BeautifulSoup(html_content, 'html.parser')
 
         match_code = match_url.split("/")[5]
@@ -528,6 +441,7 @@ def parse_match_table(team, team_url, team_id, league_dir):
     #     team_df.to_csv(f"{team_dir}/team.csv", index=False)
     #     opponent_df.to_csv(f"{team_dir}/opponents.csv", index=False)
 
+
 '''
 function to download the match logs of every team of a given league.
 '''
@@ -550,45 +464,34 @@ def get_league_match_logs(
     league_dir = f"{season_dir}{league_name}/"
     create_dir(league_dir)
 
-    league_id = get_league_id(league_name)
+    league_id = league_to_id_map[league_name]
 
 
     base_url = "https://fbref.com"
     url = f"https://fbref.com/en/comps/{league_id}/{season}/{league_name}-Stats"
 
+    if league_id in national_tournaments:
+        url = f"https://fbref.com/en/comps/{league_id}/{season}/stats/{season}-{league_name}-Stats"
+    
     print(url)
-    response = requests.get(url)
 
-    if response.status_code == 200:
-        html_content = response.text
-    else:
-        print("Failed to retrieve the webpage. Status code:", response.status_code)
-        exit()
+    driver = webdriver.Chrome()
+    driver.get(url)
+    html_content = driver.page_source
+    driver.close()
+
 
     soup = BeautifulSoup(html_content, 'html.parser')
-    div = soup.select('div[id^="all_results"]')[-1]
-    table = div.select('table[class^="stats_table"]')[0].select('tbody')[0]
-    teams = table.select('tr')
+    teams = get_teams_table(soup, league_id)
 
     for team in teams:
-        team_stats = team.select('td[data-stat="team"]')[0]
 
-        if  len(team_stats.select("a")) == 0:
+        output = get_team_url(team, league_id, season, all_comps, True)
+        
+        if output is None:
             continue
 
-        team_info = team_stats.select("a")[0]
-        team_name = team_info.text
-        team_url = team_info.get("href")
-        team_url_components = team_url.split("/")[1:]
-        team_id = team_url_components[2]
-        team_name_url = "-".join(team_url_components[3].split("-")[:-1])
-
-        team_url = f"{base_url}/en/squads/{team_id}/{season}/matchlogs/c{league_id}/schedule/{team_name_url}-Scores-and-Fixtures-{league_name}"
-        # ref_pos = team_url_components.index("squads", 0, len(team_url_components)) + 2
-        # url_league_id = "all_comps" if all_comps else f"c{league_id}"
-        # team_url_components = team_url_components[:ref_pos] + [season, url_league_id] + team_url_components[ref_pos:]
-        # team_url = base_url + "/".join(team_url_components) + f"-{league_name}"
-        # print(team_name, team_url)
+        team_url, team_name, team_id = output
+        print(f"\n{team_url}")
         time.sleep(3)
-        parse_match_table(team_name, team_url, team_id, league_dir)
-        print("\n")
+        parse_match_table(driver, team_name, team_url, team_id, league_dir)

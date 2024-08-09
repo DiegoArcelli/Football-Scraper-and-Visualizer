@@ -31,7 +31,7 @@ def get_team_stats(team, team_url):
 
 def get_league_dataset(league_name, season):
 
-    league_id = get_league_id(league_name)
+    league_id = league_to_id_map[league_name]
 
 
     base_url = "https://fbref.com"
