@@ -8,7 +8,6 @@ import time
 import os
 import re
 import copy
-
 from selenium.common.exceptions import ElementClickInterceptedException
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -33,8 +32,8 @@ def parse_minute(minute):
 
 
 
-def save_match_info(match_info_path, match_id, match_code):
-    file_content = f"round,match_id\n{match_id},{match_code}"
+def save_match_info(match_info_path, match_id, matchweek, match_code):
+    file_content = f"round,matchweek,match_id\n{match_id},{matchweek},{match_code}"
     with open(match_info_path, "w") as match_file:
         match_file.write(file_content)
 
@@ -373,6 +372,9 @@ def parse_match_table(driver, team, team_url, team_id, league_dir):
         match_url= match_url[0].get("href")
         match_url = f"{base_url}{match_url}"
 
+        matchweek = match.select('td[data-stat="round"]')[0].text
+        matchweek = matchweek.split(" ")[-1]
+
         print(match_url)
 
         driver = webdriver.Chrome()
@@ -422,7 +424,7 @@ def parse_match_table(driver, team, team_url, team_id, league_dir):
         opponent_gk_stats.to_csv(f"{match_dir}opponent_gk_stats.csv", index=False)
         save_matchlogs_table(match_file_path, match_shots)
         save_game_states(state_file_path, game_states)
-        save_match_info(match_info_path, match_id, match_code)
+        save_match_info(match_info_path, match_id, matchweek, match_code)
         save_opponent_info(opponent_file_path, opponent_name, opponent_id)
 
         match_id += 1
@@ -448,7 +450,8 @@ function to download the match logs of every team of a given league.
 def get_league_match_logs(
         root_dir : str = "./../../datasets/",
         league_name : str = "Serie-A",
-        season : str = "2023-2024", 
+        season : str = "2023-2024",
+        team : str = None,
         all_comps : bool = False
     ) -> None:
 
@@ -484,6 +487,7 @@ def get_league_match_logs(
     soup = BeautifulSoup(html_content, 'html.parser')
     teams = get_teams_table(soup, league_id)
 
+    ref_team = team
     for team in teams:
 
         output = get_team_url(team, league_id, season, all_comps, True)
@@ -492,6 +496,10 @@ def get_league_match_logs(
             continue
 
         team_url, team_name, team_id = output
+
+        if ref_team is not None and team_name != ref_team:
+            continue
+
         print(f"\n{team_url}")
         time.sleep(3)
         parse_match_table(driver, team_name, team_url, team_id, league_dir)
