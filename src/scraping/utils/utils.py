@@ -33,6 +33,10 @@ def create_dir(dir_name):
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
 
+def create_file(file_path, content):
+    with open(file_path, "w") as f:
+        f.write(content)
+
 '''
 
 '''

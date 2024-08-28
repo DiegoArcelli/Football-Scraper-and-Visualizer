@@ -239,6 +239,17 @@ def get_league_data(
     soup = BeautifulSoup(html_content, 'html.parser')
     teams = get_teams_table(soup, league_id)  
 
+    teams_name_path = f"{league_dir}fbref_names.txt"
+    if not os.path.exists(teams_name_path):
+        team_names = [get_team_url(team, league_id, season, all_comps, False)[1] for team in teams]
+        team_names = sorted(team_names)
+        file_content = "\n".join(team_names)
+        with open(teams_name_path, "w") as f:
+            f.write(file_content)
+
+
+    # for team in teams:
+    #     _, team_name, _ = get_team_url(team, league_id, season, all_comps, False)
     # iterate through each row of the table
     for team in teams:
         

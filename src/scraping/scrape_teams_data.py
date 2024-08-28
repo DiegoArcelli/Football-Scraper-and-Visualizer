@@ -1,11 +1,12 @@
 import argparse
 from utils.download_teams_data import get_league_data
 # from utils.collect_data import collect_league_data, collect_season_data
+from default_arguments import *
 
 parser = argparse.ArgumentParser(description='.')
-parser.add_argument('--data_path', default="./../../datasets/", type=str)
-parser.add_argument('--league', default="Serie-A", type=str)
-parser.add_argument('--season', default="2023-2024", type=str)
+parser.add_argument('--league', default=DEFAULT_LEAGUE, type=str)
+parser.add_argument('--season', default=DEFAULT_SEASON, type=str)
+parser.add_argument('--data_path', default=DEFAULT_DATA_PATH, type=str)
 parser.add_argument('--all_comps', action="store_true")
 args = parser.parse_args()
 

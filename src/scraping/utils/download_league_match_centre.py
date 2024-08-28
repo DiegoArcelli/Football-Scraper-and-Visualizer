@@ -1,6 +1,7 @@
 import json
 import chompjs
 from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
@@ -12,12 +13,15 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 import pandas as pd
 import time
+from .utils import *
 import os
 
 
 # actions = ActionChains(driver)
 # html_content = driver.page_source
 
+def filter_list(fn, _list):
+    return list(filter(fn, _list))
 
 def assign(data, key):
     try:
@@ -129,9 +133,10 @@ def extract_match_panel_info(data_dir, html_content):
         outcome_type = assign(event["outcomeType"], "displayName")
         outcome_value = assign(event["outcomeType"], "value")
         qualifiers = assign(event, "qualifiers")
-        qualifiers = str(qualifiers) if qualifiers is not None else None
+        qualifiers = str(qualifiers).replace("'", '"') if qualifiers is not None else None
         satisfied_events = assign(event, "satisfiedEventsTypes")
         satisfied_events = str([{"event_type_id": event_id, "event_type": events_id_to_type[event_id]} for event_id in satisfied_events])
+        satisfied_events = satisfied_events.replace("'", '"')
         related_event_id = assign(event, "relatedEventId")
         is_shot = assign(event, "isShot")
         is_goal = assign(event, "isGoal")
@@ -157,9 +162,9 @@ def extract_match_panel_info(data_dir, html_content):
     match_df.to_csv(file_match_path, index=False)
 
 
-    period_ends = match_centre["periodEndMinutes"]
+    period_ends = data["matchCentreData"]["periodEndMinutes"]
 
-    preiords = {}
+    periods = {}
     periods["first_half"] = period_ends["1"]
     periods["second_half"] = period_ends["2"]
 
@@ -168,11 +173,16 @@ def extract_match_panel_info(data_dir, html_content):
     if "3" in period_ends.keys():
         periods["first_half_overtime"] = period_ends["3"]
     
-    if "4" in periods_ends.keys():
+    if "4" in period_ends.keys():
         periods["second_half_overtime"] = period_ends["4"]
 
-    with open(f"file_period_path", 'w') as f:
+    with open(f"{file_period_path}", 'w') as f:
         json.dump(period_ends, f)
+
+
+    match_info_path = data_dir + "match_info.json"
+    with open(f"{match_info_path}", 'w') as f:
+        json.dump(match_info, f)
 
     # print(match_df.head(10))
 
@@ -209,7 +219,7 @@ def get_url(data, league):
     league = league_to_name[league]
 
     url = None
-    print(league_region, league)
+    # print(league_region, league)
     for region_dict in data:
         region = region_dict["name"]
         if league_region == region:
@@ -222,18 +232,24 @@ def get_url(data, league):
     return url, league
 
 
-def parse(
+def get_league_match_centre(
         root_dir,
         league_name,
         season,
+        team=None
     ):
 
     f = open("selenium_test/regions.json") 
     data = json.load(f)
     
     url, league = get_url(data, league_name)
+    print(url)
 
-    data_dir = f"{root_dir}{season}/{league_name}/"
+    data_dir = f"{root_dir}{season}/"
+    create_dir(data_dir)
+    data_dir = f"{data_dir}{league_name}/"
+    create_dir(data_dir)
+
     # print(url)
     # return
     # url = "https://www.whoscored.com/Regions/108/Tournaments/5/Seasons/9659/Stages/22143/Fixtures/Italy-Serie-A-2023-2024"
@@ -241,12 +257,32 @@ def parse(
     driver = webdriver.Chrome()
     driver.get(url)
 
+
     driver.find_element(By.XPATH, "//button[contains(@class, 'css-1wc0q5e')]").click()
     print("Accepted cookies")
-    print(driver.title)
+
+    # button = driver.find_element(By.CSS_SELECTOR, "button[class='webpush-swal2-close']")
+    try:
+        driver.find_element(By.CSS_SELECTOR, "button[class='webpush-swal2-close']").click()
+    except NoSuchElementException:
+        print("Banner not present")
+
+
+    teams_name_path = f"{data_dir}whoscored_names.txt"
+    if not os.path.exists(teams_name_path):
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        teams_table = soup.select("table[id^='standings-']")[0]
+        rows = teams_table.select("a[class='team-link']")
+        team_names = [row.text for row in rows]
+        team_names = sorted(team_names)
+        file_content = "\n".join(team_names)
+        with open(teams_name_path, "w") as f:
+            f.write(file_content)
+                
+    data_dir = f"{data_dir}matchlogs/"
+    create_dir(data_dir)
 
     driver.find_element(By.CSS_SELECTOR, "div[id='sub-navigation']").find_elements(By.CSS_SELECTOR, "li")[1].click()
-    print(driver.title)
 
     def select(xpath, value):
         curr_value = driver.find_element(By.XPATH, xpath)
@@ -260,25 +296,18 @@ def parse(
             # print(curr_value, value)
             time.sleep(3)
 
+    def game_filter_condition(game):
+        try:
+            game.find_element(By.CSS_SELECTOR, "a[class^='Match-module_stat']").get_attribute("href")
+        except NoSuchElementException:
+            return False
+        return True
+
 
     season = season.replace("-", "/")
     select("//select[contains(@id, 'season')]", season)
     select("//select[contains(@id, 'tournaments')]", league)
     # select("//select[contains(@id, 'locale-select')]", "EN")
-
-
-    # select(driver, "//select[contains(@id, 'season')]", "2021/2022")
-
-    # season = "2023/2024"
-    # curr_season = driver.find_element(By.XPATH, "//select[contains(@id, 'season')]")
-    # curr_season = Select(curr_season).first_selected_option.text
-
-    # while season != curr_season:
-    #     season_menu = driver.find_element(By.XPATH, "//select[contains(@id, 'season')]")
-    #     select = Select(season_menu)
-    #     select.select_by_visible_text(season)
-    #     curr_season = Select(driver.find_element(By.XPATH, "//select[contains(@id, 'season')]")).first_selected_option.text
-    #     time.sleep(3)
 
     teams_games = {}
 
@@ -290,16 +319,16 @@ def parse(
         
         count += 1
         time.sleep(2)
+
         games = driver.find_elements(By.CSS_SELECTOR, "div[class^='Match-module_match']")
+        games = filter_list(game_filter_condition, games)
         new_game = games[-1].find_element(By.CSS_SELECTOR, "a[class^='Match-module_stat']").get_attribute("href")
-        
+
         if count == 5:
             break
         
         if new_game == old_game:
             continue
-
-        games = driver.find_elements(By.CSS_SELECTOR, "div[class^='Match-module_match']")
 
         count = 0
         old_game = new_game
@@ -318,14 +347,12 @@ def parse(
             # print(driver.current_url)
             
             home, away = fix_team_name(teams[0].text), fix_team_name(teams[1].text)
-            
-            for team in [home, away]:
-                if team in teams_games.keys():
-                    teams_games[team].append(game_url)
-                else:
-                    teams_games[team] = [game_url]
 
-            
+            for team, opponent, venue in [(home, away, "home"), (away, home, "away")]:
+                if team in teams_games.keys():
+                    teams_games[team].append((venue, opponent, game_url))
+                else:
+                    teams_games[team] = [(venue, opponent, game_url)]
 
 
         # print(new_date)
@@ -335,28 +362,58 @@ def parse(
         driver.find_element(By.ID, "dayChangeBtn-prev").click()
         # time.sleep(10)
             
-    driver.close()
+    # driver.close()
+    # for team in teams_games.keys():
 
-    print(data_dir)
-    print(teams_games.keys())
+    team_info_dir = data_dir + "teams/"
+    match_info_dir = data_dir + "matches/" 
+    create_dir(team_info_dir)
+    create_dir(match_info_dir)
+
     for team in teams_games.keys():
-        print(team, len(teams_games[team]))
-        continue
-        for idx, game in enumerate(teams_games[team][::-1]):
-            print(game)
-            data_dir = f"{data_dir}{team}/matchlogs/match_{idx+1}/"
-            if not os.path.exists(data_dir):
-                driver = webdriver.Chrome()
-                driver.get(game)
-                extract_match_panel_info(data_dir, driver.page_source)
-                driver.close()
-                print(f"Saved data in {data_dir}")
+        # print(team, len(teams_games[team]))
+        idx = 1
+        for venue, opponent, game_url in teams_games[team][::-1]:
+            print(game_url)
+            team_dir = f"{team_info_dir}{team}/"
+            create_dir(team_dir)
+            team_file = f"{team_dir}match_{idx}.json"
+
+            if os.path.exists(team_file):
+                idx += 1
+                continue
+
+            match_dict = {
+                "team": team,
+                "opponent": opponent,
+                "venue": venue
+            }
+
+            with open(f"{team_file}", 'w') as f:
+                json.dump(match_dict, f)
+
+            match_dir = f"{match_info_dir}{team}-{opponent}/"
+            create_dir(match_dir)
+
+            if os.path.exists(match_dir + "match_info.json"):
+                idx += 1
+                continue
+
+            driver.execute_script("window.open('');")
+            driver.switch_to.window(driver.window_handles[-1])
+            driver.get(game_url)
+            # print(len(driver.page_source), type(driver.page_source))
+            while True:
+                if "require.config.params['matchheader'] = " in driver.page_source:
+                    extract_match_panel_info(match_dir, driver.page_source)
+                    break
+                else:
+                    time.sleep(1)
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+            print(f"Saved data in {match_dir}")
+            idx += 1
+
         print("")
 
-    # for game in teams_games["Juventus"][::-1]:
-    #     driver = webdriver.Chrome()
-    #     driver.get(game)
-    #     extract_match_panel_info(driver.page_source)
-    #     driver.close()
-    # # res = button.click()
-    # print(res.title)
+    driver.close()
