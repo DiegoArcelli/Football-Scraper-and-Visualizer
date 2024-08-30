@@ -264,8 +264,9 @@ def get_league_match_centre(
     # button = driver.find_element(By.CSS_SELECTOR, "button[class='webpush-swal2-close']")
     try:
         driver.find_element(By.CSS_SELECTOR, "button[class='webpush-swal2-close']").click()
+        print("Closed subscription banner")
     except NoSuchElementException:
-        print("Banner not present")
+        print("Subscription banner not present")
 
 
     teams_name_path = f"{data_dir}whoscored_names.txt"
@@ -278,11 +279,26 @@ def get_league_match_centre(
         file_content = "\n".join(team_names)
         with open(teams_name_path, "w") as f:
             f.write(file_content)
-                
-    data_dir = f"{data_dir}matchlogs/"
-    create_dir(data_dir)
+        print("Saved team names")
 
-    driver.find_element(By.CSS_SELECTOR, "div[id='sub-navigation']").find_elements(By.CSS_SELECTOR, "li")[1].click()
+    name_mapping_path = f"{data_dir}names_mapping.json"
+    if not os.path.exists(teams_name_path):
+        print(f"Missing {name_mapping_path}\n")
+        exit()
+    f = open(name_mapping_path) 
+    names_map = json.load(f)
+    
+
+                
+    # data_dir = f"{data_dir}matchlogs/"
+    # create_dir(data_dir)
+    while True:
+        try:
+            driver.find_element(By.CSS_SELECTOR, "div[id='sub-navigation']").find_elements(By.CSS_SELECTOR, "li")[1].click()
+            break
+        except ElementClickInterceptedException:
+            time.sleep(1)
+    print("Opened other navigation window")
 
     def select(xpath, value):
         curr_value = driver.find_element(By.XPATH, xpath)
@@ -299,6 +315,10 @@ def get_league_match_centre(
     def game_filter_condition(game):
         try:
             game.find_element(By.CSS_SELECTOR, "a[class^='Match-module_stat']").get_attribute("href")
+            text = game.find_element(By.CSS_SELECTOR, "span[class^='Match-module_']").text
+            # print(text)
+            if text != "FIN":
+                return False
         except NoSuchElementException:
             return False
         return True
@@ -347,17 +367,18 @@ def get_league_match_centre(
             # print(driver.current_url)
             
             home, away = fix_team_name(teams[0].text), fix_team_name(teams[1].text)
+            home = names_map[home]; away = names_map[away]
 
-            for team, opponent, venue in [(home, away, "home"), (away, home, "away")]:
-                if team in teams_games.keys():
-                    teams_games[team].append((venue, opponent, game_url))
+            for ref_team, opponent, venue in [(home, away, "home"), (away, home, "away")]:
+                if ref_team in teams_games.keys():
+                    teams_games[ref_team].append((venue, opponent, game_url))
                 else:
-                    teams_games[team] = [(venue, opponent, game_url)]
+                    teams_games[ref_team] = [(venue, opponent, game_url)]
 
 
         # print(new_date)
         total_games += len(games)
-        print(total_games)
+        # print(total_games)
 
         driver.find_element(By.ID, "dayChangeBtn-prev").click()
         # time.sleep(10)
@@ -365,34 +386,41 @@ def get_league_match_centre(
     # driver.close()
     # for team in teams_games.keys():
 
-    team_info_dir = data_dir + "teams/"
     match_info_dir = data_dir + "matches/" 
-    create_dir(team_info_dir)
     create_dir(match_info_dir)
 
-    for team in teams_games.keys():
+    if team is None:
+        teams = teams_games.keys()
+    else:
+        teams = [team]
+
+    for team in teams:
         # print(team, len(teams_games[team]))
         idx = 1
+        print(f"\n{team}")
         for venue, opponent, game_url in teams_games[team][::-1]:
             print(game_url)
-            team_dir = f"{team_info_dir}{team}/"
+            
+            team_dir = f"{data_dir}{team}/"
+            create_dir(team_dir)
+            team_dir = f"{team_dir}/matchlogs/"
             create_dir(team_dir)
             team_file = f"{team_dir}match_{idx}.json"
 
-            if os.path.exists(team_file):
+            match_dict = {
+                "team": team if venue == "home" else opponent,
+                "opponent": opponent if venue == "home" else team,
+                "venue": venue,
+                "index": idx
+            }
+
+            if check_match_existence(team_file, "whoscored"):
+                save_match_info_json_file(team_file, "whoscored", match_dict)
                 idx += 1
                 continue
 
-            match_dict = {
-                "team": team,
-                "opponent": opponent,
-                "venue": venue
-            }
-
-            with open(f"{team_file}", 'w') as f:
-                json.dump(match_dict, f)
-
-            match_dir = f"{match_info_dir}{team}-{opponent}/"
+            match_name = f"{f'{team}-{opponent}' if venue == 'home' else f'{opponent}-{team}'}"
+            match_dir = f"{match_info_dir}{match_name}/"
             create_dir(match_dir)
 
             if os.path.exists(match_dir + "match_info.json"):
@@ -411,9 +439,8 @@ def get_league_match_centre(
                     time.sleep(1)
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
+
             print(f"Saved data in {match_dir}")
             idx += 1
-
-        print("")
 
     driver.close()

@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import json
 
 national_tournaments = [676]
 
@@ -46,6 +47,56 @@ def merge_data_frames(df_list, ref_col):
         merged_df = pd.merge(merged_df, df, on=ref_col, how='inner', suffixes=('', '_to_drop'))
         merged_df = merged_df[[col for col in merged_df.columns if not col.endswith("_to_drop")]]
     return merged_df    
+
+
+def check_match_existence(file_path, match_type):
+    
+    assert match_type in ["fbref", "whoscored"], 'The match_type argument must be "whoscored" or "fbref"'
+
+    if not os.path.exists(file_path):
+        return False
+
+    f = open(file_path)
+    match_dict = json.load(f)
+
+    if match_dict[match_type] == True:
+        return True
+
+    return False
+
+
+def save_match_info_json_file(file_path, match_type, dict_data):
+    
+    assert match_type in ["fbref", "whoscored"], 'The match_type argument must be "whoscored" or "fbref"'
+
+    if not os.path.exists(file_path):
+
+        match_dict = {
+            "team": dict_data["team"],#team if venue == "home" else opponent,
+            "opponent": dict_data["opponent"],#opponent if venue == "home" else team,
+            "whoscored": True if match_type == "whoscored" else False,
+            "fbref": True if match_type == "fbref" else False,
+            "venue": dict_data["venue"],
+            "index": dict_data["index"]
+        }
+
+        with open(file_path, 'w') as f:
+            json.dump(match_dict, f)
+
+    
+    f = open(file_path)
+    match_dict = json.load(f)
+
+    if match_dict[match_type] == True:
+        return
+    
+    match_dict[match_type] = True
+    with open(file_path, 'w') as f:
+        json.dump(match_dict, f)
+
+
+    
+    
 
 
 def get_teams_table(soup, league_id):

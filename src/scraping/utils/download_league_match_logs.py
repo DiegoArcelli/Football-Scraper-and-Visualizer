@@ -55,7 +55,7 @@ def save_game_states(file_path, game_states):
         match_file.write(file_content)
 
 def save_opponent_info(file_path, opponent_name, opponent_id):
-    file_content = f"opponent_name,opponent_id\n{opponent_name},{opponent_id}"
+    file_content = f"away_team_name,away_team_id\n{opponent_name},{opponent_id}"
     with open(file_path, "w") as opponent_file:
         opponent_file.write(file_content)
 
@@ -316,13 +316,16 @@ def parse_shooting_table(soup, team_id, venue):
 def parse_match_table(driver, team, team_url, team_id, league_dir):
 
     dir_name = team.replace(" ", "-")
-    team_dir = f"{league_dir}{dir_name}/matchlogs/"
+
+    team_dir = f"{league_dir}{dir_name}/"
+    create_dir(team_dir)
+    team_dir = f"{team_dir}matchlogs/"
     create_dir(team_dir)
 
-    driver = webdriver.Chrome()
+    # driver = webdriver.Chrome()
     driver.get(team_url)
     html_content = driver.page_source
-    driver.close()
+    # driver.close()
 
     soup = BeautifulSoup(html_content, 'html.parser')
 
@@ -338,28 +341,20 @@ def parse_match_table(driver, team, team_url, team_id, league_dir):
 
     matches = [match for match in matches if match.select('td[data-stat="match_report"]') != []]
 
+    create_dir(f"{league_dir}matches/")
+
     for match in matches:
 
-        match_dir = f"{team_dir}match_{match_id}/"
-
-        match_file_path = f"{match_dir}shots.csv"
-        state_file_path = f"{match_dir}game_states.csv"
-        opponent_file_path = f"{match_dir}opponent_info.csv"
-        match_info_path = f"{match_dir}match_info.csv"
-        
-        if os.path.exists(opponent_file_path): # and os.path.exists(match_file_path):
-            match_id += 1
-            continue
 
         match_cell = match.select('td[data-stat="match_report"]')
-        # if match_cell == []:
-        #     continue
+        if match_cell == []:
+            continue
 
         match_report = match_cell[0].select("a")[0].text
         # match_report = match.select('td[data-stat="match_report"]')[0].select("a")[0].text
         # # print(match_report)
         if match_report != "Match Report":
-            return
+            continue
 
 
         match_url = match_cell[0].select('a')
@@ -367,7 +362,39 @@ def parse_match_table(driver, team, team_url, team_id, league_dir):
         if match_url == []:
             continue
 
-        venue = match.select('td[data-stat="venue"]')[0].text
+        opponent = match.select('td[data-stat="opponent"]')[0].text
+        venue = match.select('td[data-stat="venue"]')[0].text.lower()
+
+        match_dict = {
+            "team": team if venue == "home" else opponent,
+            "opponent": opponent if venue == "home" else team,
+            "venue": venue,
+            "index": match_id
+        }
+
+        match_file = f"{team_dir}/match_{match_id}.json"
+        if check_match_existence(match_file, "fbref"):
+            save_match_info_json_file(match_file, "fbref", match_dict)
+            match_id += 1
+            continue
+
+
+        match_name = f'{team}-{opponent}' if venue == "home" else f'{opponent}-{team}'
+        match_dir = f"{league_dir}matches/{match_name}/"
+        create_dir(match_dir)
+
+        # if os.path.exists(match_dir + "match_info.json"):
+        #     match_id += 1
+        #     continue
+
+        match_file_path = f"{match_dir}shots.csv"
+        state_file_path = f"{match_dir}game_states.csv"
+        opponent_file_path = f"{match_dir}away_team_info.csv"
+        match_info_path = f"{match_dir}match_info.csv"
+        
+        if os.path.exists(opponent_file_path + "away_team_info.csv"): # and os.path.exists(match_file_path):
+            match_id += 1
+            continue
 
         match_url= match_url[0].get("href")
         match_url = f"{base_url}{match_url}"
@@ -377,23 +404,18 @@ def parse_match_table(driver, team, team_url, team_id, league_dir):
 
         print(match_url)
 
-        driver = webdriver.Chrome()
+        driver.execute_script("window.open('');")
+        driver.switch_to.window(driver.window_handles[-1])
         driver.get(match_url)
-        html_content = driver.page_source
-        driver.close()
 
-        # is_page_dowloaded = False
-        # while not is_page_dowloaded:
-        #     try:
-        #         r = session.get(match_url)
-        #         r.html.render()  # this call executes the js in the page
-        #         is_page_dowloaded = True
-        #     except (TimeoutError, BrowserError):
-        #         print("Retrying download")
-        #         is_page_dowloaded = False 
-                
-        # html_content = r.html.html
-        match_soup = BeautifulSoup(html_content, 'html.parser')
+        while True:
+            match_soup = BeautifulSoup(html_content, 'html.parser')
+            html_content = driver.page_source
+            if len(match_soup.select('table[id="shots_all"]')) > 0:
+                break
+            else:
+                time.sleep(1)
+
 
         match_code = match_url.split("/")[5]
 
@@ -412,20 +434,27 @@ def parse_match_table(driver, team, team_url, team_id, league_dir):
         team_stats.drop(['shirtnumber', 'age'], axis=1, inplace=True)
         opponent_stats.drop(['shirtnumber', 'age'], axis=1, inplace=True)
 
-        create_dir(match_dir)
-
         # table, team_player_stats, team_stats, opponent_player_stats, opp_stats
+        reference_team = venue
+        opponent_team = "away" if venue == "home" else "home"
+        
 
-        team_players_stats.to_csv(f"{match_dir}team_players_stats.csv", index=False)
-        opponent_players_stats.to_csv(f"{match_dir}opponent_players_stats.csv", index=False)
-        team_stats.to_csv(f"{match_dir}team_stats.csv", index=False)
-        opponent_stats.to_csv(f"{match_dir}opponent_stats.csv", index=False)
-        team_gk_stats.to_csv(f"{match_dir}team_gk_stats.csv", index=False)
-        opponent_gk_stats.to_csv(f"{match_dir}opponent_gk_stats.csv", index=False)
+        team_players_stats.to_csv(f"{match_dir}{reference_team}_team_players_stats.csv", index=False)
+        opponent_players_stats.to_csv(f"{match_dir}{opponent_team}_team_players_stats.csv", index=False)
+        team_stats.to_csv(f"{match_dir}{reference_team}_team_stats.csv", index=False)
+        opponent_stats.to_csv(f"{match_dir}{opponent_team}_team_stats.csv", index=False)
+        team_gk_stats.to_csv(f"{match_dir}{reference_team}_gk_stats.csv", index=False)
+        opponent_gk_stats.to_csv(f"{match_dir}{opponent_team}_gk_stats.csv", index=False)
         save_matchlogs_table(match_file_path, match_shots)
         save_game_states(state_file_path, game_states)
         save_match_info(match_info_path, match_id, matchweek, match_code)
         save_opponent_info(opponent_file_path, opponent_name, opponent_id)
+
+        driver.close()
+        driver.switch_to.window(driver.window_handles[-1])
+
+        save_match_info_json_file(match_file, "fbref", match_dict)
+
 
         match_id += 1
         time.sleep(3)
@@ -481,7 +510,7 @@ def get_league_match_logs(
     driver = webdriver.Chrome()
     driver.get(url)
     html_content = driver.page_source
-    driver.close()
+    # driver.close()
 
 
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -502,4 +531,13 @@ def get_league_match_logs(
 
         print(f"\n{team_url}")
         time.sleep(3)
+
+        driver.execute_script("window.open('');")
+        driver.switch_to.window(driver.window_handles[-1])
+        
         parse_match_table(driver, team_name, team_url, team_id, league_dir)
+
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])
+
+    driver.close()

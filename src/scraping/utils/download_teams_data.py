@@ -41,29 +41,15 @@ def get_team_data(
     dir_name = team.replace(" ", "-")
     team_dir = f"{league_dir}{dir_name}/"
     create_dir(team_dir)
-
-
-    driver = webdriver.Chrome()
     driver.get(team_url)
-    html_content = driver.page_source
-    driver.close()
 
-    # session = HTMLSession()
-
-    # # download the html page containing the stats of the team
-    # is_page_dowloaded = False
-    # while not is_page_dowloaded:
-    #     try:
-    #         r = session.get(team_url)
-    #         r.html.render()  # this call executes the js in the page
-    #         is_page_dowloaded = True
-    #     except (TimeoutError, BrowserError):
-    #        print("Retrying download")
-    #        is_page_dowloaded = False 
-            
-    # html_content = r.html.html
-    # print(html_content)
-    soup = BeautifulSoup(html_content, 'html.parser')
+    while True:
+        html_content = driver.page_source
+        soup = BeautifulSoup(html_content, 'html.parser')
+        if len(soup.select(f"table#stats_standard_{league_id}")) > 0:
+            break
+        else:
+            time.sleep(1)
 
     if all_comps:
         table = soup.select("table#stats_standard_combined")
@@ -233,7 +219,7 @@ def get_league_data(
     driver = webdriver.Chrome()
     driver.get(url)
     html_content = driver.page_source
-    driver.close()
+    # driver.close()
 
     # we extract from the html page of the the table containing a list of all the teams of the league
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -260,5 +246,11 @@ def get_league_data(
         team_url, team_name, team_id = output
         print(f"\n{team_url}")
 
-        get_team_data(driver, team_name, team_id, team_url, league_dir, league_id, all_comps)        
+        driver.execute_script("window.open('');")
+        driver.switch_to.window(driver.window_handles[-1])
+        get_team_data(driver, team_name, team_id, team_url, league_dir, league_id, all_comps)
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])      
         time.sleep(3)
+    
+    driver.close()

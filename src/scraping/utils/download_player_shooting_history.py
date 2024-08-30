@@ -17,6 +17,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 import os
+import time
 import io
 
 
@@ -61,20 +62,16 @@ def get_minutes_played(soup, player_id):
     return "0"
 
 def parse_shooting_table(driver, url, match_code, player_id, match_id):
-    # response = requests.get(url)
 
-    # if response.status_code == 200:
-    #     html_content = response.text
-    # else:
-    #     print("Failed to retrieve the webpage. Status code:", response.status_code)
-    #     exit()
-
-    driver = webdriver.Chrome()
     driver.get(url)
-    html_content = driver.page_source
-    driver.close()
 
-    soup = BeautifulSoup(html_content, 'html.parser')
+    while True:
+        html_content = driver.page_source
+        soup = BeautifulSoup(html_content, 'html.parser')
+        if len(soup.select('table[id="shots_all"]')) > 0:
+            break
+        else:
+            time.sleep(1)
 
     minutes_played = get_minutes_played(soup, player_id)
 
@@ -141,8 +138,6 @@ def get_shooting_history(
     driver = webdriver.Chrome()
     driver.get(url)
     html_content = driver.page_source
-    driver.close()
-
     # response = requests.get(url)
 
     # if response.status_code == 200:
@@ -202,8 +197,11 @@ def get_shooting_history(
             match_id += 1
             continue
 
-
+        driver.execute_script("window.open('');")
+        driver.switch_to.window(driver.window_handles[-1])
         match_shots, match_minutes = parse_shooting_table(driver, match_url, match_code, player_id, match_id)
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])     
 
         matches_shots.append(match_shots)
         matches_minutes.append(match_minutes)
@@ -211,6 +209,7 @@ def get_shooting_history(
         match_id += 1
 
     matches_shots = [shot_info for shots_info in matches_shots for shot_info in shots_info]
+    driver.close()
 
     
 
@@ -238,7 +237,6 @@ def get_shooting_history(
         file_content += row
 
     file_path = f"{file_dir}/minutes.csv"
-
 
     if os.path.exists(file_path):
         new_data = pd.read_csv(io.StringIO(file_content))
