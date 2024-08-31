@@ -315,9 +315,11 @@ def parse_shooting_table(soup, team_id, venue):
 
 def parse_match_table(driver, team, team_url, team_id, league_dir):
 
-    dir_name = team.replace(" ", "-")
+    if team not in ["Inter", "Genoa"]:
+        return
 
-    team_dir = f"{league_dir}{dir_name}/"
+
+    team_dir = f"{league_dir}{team}/"
     create_dir(team_dir)
     team_dir = f"{team_dir}matchlogs/"
     create_dir(team_dir)
@@ -392,7 +394,8 @@ def parse_match_table(driver, team, team_url, team_id, league_dir):
         opponent_file_path = f"{match_dir}away_team_info.csv"
         match_info_path = f"{match_dir}match_info.csv"
         
-        if os.path.exists(opponent_file_path + "away_team_info.csv"): # and os.path.exists(match_file_path):
+        if os.path.exists(opponent_file_path): # and os.path.exists(match_file_path):
+            save_match_info_json_file(match_file, "fbref", match_dict)
             match_id += 1
             continue
 
@@ -457,7 +460,7 @@ def parse_match_table(driver, team, team_url, team_id, league_dir):
 
 
         match_id += 1
-        time.sleep(3)
+        time.sleep(1)
         
         
 
@@ -530,7 +533,7 @@ def get_league_match_logs(
             continue
 
         print(f"\n{team_url}")
-        time.sleep(3)
+        time.sleep(1)
 
         driver.execute_script("window.open('');")
         driver.switch_to.window(driver.window_handles[-1])

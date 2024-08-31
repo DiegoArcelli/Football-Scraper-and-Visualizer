@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import json
+import time
 
 national_tournaments = [676]
 
@@ -95,8 +96,14 @@ def save_match_info_json_file(file_path, match_type, dict_data):
         json.dump(match_dict, f)
 
 
-    
-    
+def try_till_it_is_true(function, exception, sleep_time=1):
+    while True:
+        try:
+            function()
+            break
+        except exception:
+            time.sleep(sleep_time)
+
 
 
 def get_teams_table(soup, league_id):

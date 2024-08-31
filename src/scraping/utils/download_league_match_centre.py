@@ -292,12 +292,14 @@ def get_league_match_centre(
                 
     # data_dir = f"{data_dir}matchlogs/"
     # create_dir(data_dir)
-    while True:
-        try:
-            driver.find_element(By.CSS_SELECTOR, "div[id='sub-navigation']").find_elements(By.CSS_SELECTOR, "li")[1].click()
-            break
-        except ElementClickInterceptedException:
-            time.sleep(1)
+    func = lambda: driver.find_element(By.CSS_SELECTOR, "div[id='sub-navigation']").find_elements(By.CSS_SELECTOR, "li")[1].click()
+    try_till_it_is_true(func, ElementClickInterceptedException, sleep_time=1)
+    # while True:
+    #     try:
+    #         driver.find_element(By.CSS_SELECTOR, "div[id='sub-navigation']").find_elements(By.CSS_SELECTOR, "li")[1].click()
+    #         break
+    #     except ElementClickInterceptedException:
+    #         time.sleep(1)
     print("Opened other navigation window")
 
     def select(xpath, value):
@@ -424,6 +426,7 @@ def get_league_match_centre(
             create_dir(match_dir)
 
             if os.path.exists(match_dir + "match_info.json"):
+                save_match_info_json_file(team_file, "whoscored", match_dict)
                 idx += 1
                 continue
 
@@ -439,6 +442,7 @@ def get_league_match_centre(
                     time.sleep(1)
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
+            save_match_info_json_file(team_file, "whoscored", match_dict)
 
             print(f"Saved data in {match_dir}")
             idx += 1

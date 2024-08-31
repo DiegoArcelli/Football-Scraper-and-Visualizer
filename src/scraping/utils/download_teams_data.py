@@ -38,7 +38,6 @@ def get_team_data(
     ) -> None:
 
     # creation of the directory for the specific team
-    dir_name = team.replace(" ", "-")
     team_dir = f"{league_dir}{dir_name}/"
     create_dir(team_dir)
     driver.get(team_url)

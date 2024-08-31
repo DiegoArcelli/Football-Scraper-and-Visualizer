@@ -1,5 +1,6 @@
 .env/
 datasets/
 images/
+logos/
 __pycache__/
 databases/
