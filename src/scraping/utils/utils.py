@@ -119,9 +119,9 @@ def get_teams_table(soup, league_id):
     return teams    
 
 
-def get_team_url(team, league_id, season, all_comps, matchlogs=False):
+def get_team_url(team, data, matchlogs=False):
 
-    tag = "th" if league_id in national_tournaments else "td"
+    tag = "th" if data.league_id in national_tournaments else "td"
     team_stats = team.select(f"{tag}[data-stat='team']")[0]
 
     if  len(team_stats.select("a")) == 0:
@@ -136,12 +136,12 @@ def get_team_url(team, league_id, season, all_comps, matchlogs=False):
     team_url = team_info.get("href")
     url_compontens = team_url.split("/")
     team_id = url_compontens[3]
-    league_id_item = "all_comps" if all_comps else f"c{league_id}"
+    league_id_item = "all_comps" if data.all_comps else f"c{data.league_id}"
 
     if matchlogs:
-        team_url = f"https://fbref.com/en/squads/{team_id}/{season}/{league_id_item}/matchlogs/Scores-and-Fixtures"
+        team_url = f"https://fbref.com/en/squads/{team_id}/{data.season}/{league_id_item}/matchlogs/Scores-and-Fixtures"
     else:
-        team_url = f"https://fbref.com/en/squads/{team_id}/{season}/{league_id_item}/Stats"
+        team_url = f"https://fbref.com/en/squads/{team_id}/{data.season}/{league_id_item}/Stats"
     
     return team_url, team_name, team_id
 
@@ -280,3 +280,69 @@ def parse_table(
         return players_stats, team_stats
 
     return players_stats
+
+
+# adds the / character at the end of the path if not present
+def add_trailing_slash(path):
+    return path + ("/" if path[-1] != "/" else "")
+
+
+def create_league_directory(data) -> None:
+
+    data.root_dir = add_trailing_slash(data.root_dir)
+    season_dir = f"{data.root_dir}{data.season}/"
+
+    create_dir(season_dir)
+
+    if data.all_comps:
+        season_dir = f"./../../datasets/{data.season}/All-Competitions/"
+        create_dir(season_dir)
+
+    league_dir = f"{season_dir}{data.league_name}/"
+    create_dir(league_dir)
+
+    return league_dir
+
+
+def create_league_url(data):
+    url = f"https://fbref.com/en/comps/{data.league_id}/{data.season}/{data.league_name}-Stats"
+    if data.league_id in national_tournaments:
+        url = f"https://fbref.com/en/comps/{data.league_id}/{data.season}/stats/{data.season}-{data.league_name}-Stats"
+    return url
+
+
+class ScrapeArgs:
+
+    def __init__(
+        self,
+        root_dir = None,
+        league_name = None,
+        season = None,
+        all_comps = None,
+        league_id = None,
+        league_dir = None,
+        team = None
+    ):
+        self.root_dir = root_dir
+        self.league_name = league_name
+        self.season = season
+        self.all_comps = all_comps
+        self.league_id = league_id
+        self.league_dir = league_dir
+        self.team = team
+
+
+class ScrapeTeamArgs:
+
+    def __init__(
+        self,
+        team_name = None,
+        team_url = None,
+        team_id = None,
+        team_dir = None,
+    ):
+        self.team_name = team_name
+        self.team_url = team_url
+        self.team_id = team_id
+        self.team_dir = team_dir
+
