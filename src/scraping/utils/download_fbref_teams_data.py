@@ -137,7 +137,7 @@ def get_team_data(
     get_goalkeepers_data(soup, team_data, data, tables)
     save_data(data, team_data, tables)
 
-def create_league_team_names_file(teams, data):
+def create_league_team_names_file(teams, data: ScrapeArgs) -> None:
     teams_name_path = f"{data.league_dir}fbref_names.txt"
 
     if os.path.exists(teams_name_path):
@@ -229,7 +229,7 @@ root_dir/
         opponents.csv
         goalkeepers.csv
 '''
-def get_league_data(data : ScrapeArgs) -> None:
+def get_league_data(data: ScrapeArgs) -> None:
 
 
     assert data.league_name in admissible_leagues, f"Not valid league name. Valid names are {admissible_leagues}"
