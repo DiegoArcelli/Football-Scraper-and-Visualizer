@@ -1,5 +1,5 @@
 import argparse
-from utils.download_fbref_teams_data import get_league_data
+from utils.download_fbref_teams_data import get_fbref_league_data
 # from utils.collect_data import collect_league_data, collect_season_data
 from default_arguments import *
 from utils.utils import ScrapeArgs
@@ -19,7 +19,7 @@ data = ScrapeArgs(
     all_comps=args.all_comps
 )
 
-get_league_data(data)
+get_fbref_league_data(data)
 
 # collect_league_data(
 #     root_dir=args.data_path,

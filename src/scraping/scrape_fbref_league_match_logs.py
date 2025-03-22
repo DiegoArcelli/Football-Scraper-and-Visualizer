@@ -1,7 +1,8 @@
 import argparse
-from utils.download_league_match_logs import get_league_match_logs
+from utils.download_fbref_league_match_logs import get_fbref_league_match_logs
 from default_arguments import *
 from utils.utils import ScrapeArgs
+from pathlib import Path
 
 parser = argparse.ArgumentParser(description='.')
 parser.add_argument('--all_comps', action="store_true")
@@ -13,11 +14,11 @@ args = parser.parse_args()
 
 
 data = ScrapeArgs(
-    root_dir=args.data_path,
+    root_dir=Path(args.data_path),
     league_name=args.league,
     season=args.season,
     all_comps=args.all_comps,
     team=args.team
 )
 
-get_league_match_logs(data)
+get_fbref_league_match_logs(data)

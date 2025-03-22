@@ -3,9 +3,12 @@ import pandas as pd
 import json
 import time
 from pathlib import Path
-from bs4 import BeautifulSoup
-from bs4 import ResultSet, Tag
+from bs4 import BeautifulSoup, ResultSet, Tag
+from selenium.webdriver import Chrome
+from typing import Dict, List, Tuple, Literal
+from pandas import DataFrame
 
+WebDriver = Chrome
 
 class ScrapeArgs:
 
@@ -83,7 +86,10 @@ def create_file(file_path: Path, content: str):
 '''
 
 '''
-def merge_data_frames(df_list, ref_col):
+def merge_data_frames(
+    df_list: List[DataFrame],
+    ref_col: str
+) -> DataFrame:
     merged_df = df_list[0]
     for df in df_list[1:]:
         merged_df = pd.merge(merged_df, df, on=ref_col, how='inner', suffixes=('', '_to_drop'))
@@ -91,7 +97,10 @@ def merge_data_frames(df_list, ref_col):
     return merged_df    
 
 
-def check_match_existence(file_path, match_type):
+def check_match_existence(
+    file_path: Path,
+    match_type: Literal["fbref", "whoscored"]
+) -> bool:
     
     assert match_type in ["fbref", "whoscored"], 'The match_type argument must be "whoscored" or "fbref"'
 
@@ -160,7 +169,7 @@ def get_teams_table(soup: BeautifulSoup, league_id: str) -> ResultSet[Tag]:
     return teams    
 
 
-def get_team_url(team, data, matchlogs=False):
+def get_team_info(team: BeautifulSoup, data: ScrapeArgs, matchlogs=False) -> Tuple[str, str, str] | None:
 
     tag = "th" if data.league_id in national_tournaments else "td"
     team_stats = team.select(f"{tag}[data-stat='team']")[0]
@@ -196,12 +205,12 @@ Arguments:
   to the games played in all the competitions of the season
 '''
 def parse_table(
-    table,
-    team_name,
-    team_id,
+    table: Tag,
+    team_name: str,
+    team_id: str,
     all_comps=False,
     return_opponent=True
-):
+) -> Tuple[Dict[str, List]] | Dict[str, List]:
 
     # dictionaries which will contains the data of the players, the team and the opponents
     players_stats = {}
@@ -323,14 +332,9 @@ def parse_table(
     return players_stats
 
 
-# adds the / character at the end of the path if not present
-def add_trailing_slash(path):
-    return path + ("/" if path[-1] != "/" else "")
-
 
 def create_league_directory(data: ScrapeArgs) -> Path:
 
-    # data.root_dir = add_trailing_slash(data.root_dir)
     # season_dir = f"{data.root_dir}{data.season}/"
     season_dir = data.root_dir.joinpath(data.season)
 

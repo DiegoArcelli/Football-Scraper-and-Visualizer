@@ -3,15 +3,17 @@ import pandas as pd
 from .utils import *
 import time
 from selenium import webdriver
-
+from bs4 import ResultSet, Tag
+from typing import Dict, List
+from pandas import DataFrame
 
 
 def get_goalkeepers_data(
-    soup,
-    team_data,
-    data,
-    tables
-):
+    soup: Tag,
+    team_data: ScrapeTeamArgs,
+    data: ScrapeArgs,
+    tables: Dict[str, List[DataFrame]],
+) -> None:
     gk_table_names = [
         f"stats_keeper_{data.league_id}",
         f"stats_keeper_adv_{data.league_id}"
@@ -36,11 +38,11 @@ def get_goalkeepers_data(
 
 
 def get_players_data(
-    soup,
-    team_data,
-    data,
-    tables,
-):
+    soup: Tag,
+    team_data: ScrapeTeamArgs,
+    data: ScrapeArgs,
+    tables: Dict[str, List[DataFrame]],
+) -> None:
     
     table_names = [
         f"stats_standard_{data.league_id}",
@@ -72,18 +74,30 @@ def get_players_data(
             tables["players_tables"].append(players_df)
 
 
-def save_data(data, team_data, tables):
+def save_data(
+    data: ScrapeArgs,
+    team_data: ScrapeTeamArgs,
+    tables: Dict[str, List[DataFrame]]
+) -> None:
     print(f"Saving {team_data.team_name} data in {team_data.team_dir}")
     players_df = merge_data_frames(tables["players_tables"], "player_id")
     gk_df = merge_data_frames(tables["gk_tables"], "player_id")
-    players_df.to_csv(f"{team_data.team_dir}/players.csv", index=False)
-    gk_df.to_csv(f"{team_data.team_dir}/goalkeepers.csv", index=False)
+
+    player_csv_path = team_data.team_dir.joinpath("players.csv")
+    players_df.to_csv(player_csv_path, index=False)
+
+    gk_csv_path = team_data.team_dir.joinpath("goalkeepers.csv")
+    gk_df.to_csv(gk_csv_path, index=False)
 
     if not data.all_comps:
         team_df = merge_data_frames(tables["team_tables"], "team")
         opponent_df = merge_data_frames(tables["opponent_tables"], "team")
-        team_df.to_csv(f"{team_data.team_dir}/team.csv", index=False)
-        opponent_df.to_csv(f"{team_data.team_dir}/opponents.csv", index=False)
+
+        team_csv_path = team_data.team_dir.joinpath("team.csv")
+        team_df.to_csv(team_csv_path, index=False)
+
+        opponent_csv_path = team_data.team_dir.joinpath("opponents.csv")
+        opponent_df.to_csv(opponent_csv_path, index=False)
 
 
 '''
@@ -99,13 +113,15 @@ Arguments:
   to the games played in all the competitions of the season
 '''
 def get_team_data(
-        driver,
-        team_data,
-        data
-    ) -> None:
+    driver: WebDriver,
+    team_data: ScrapeTeamArgs,
+    data: ScrapeArgs
+) -> None:
 
     # creation of the directory for the specific team
-    team_dir = f"{data.league_dir}{team_data.team_name}/"
+    # team_dir = f"{data.league_dir}{team_data.team_name}/"
+    team_dir = data.league_dir.joinpath(team_data.team_name)
+    
     team_data.team_dir = team_dir
     create_dir(team_data.team_dir)
     
@@ -137,13 +153,18 @@ def get_team_data(
     get_goalkeepers_data(soup, team_data, data, tables)
     save_data(data, team_data, tables)
 
-def create_league_team_names_file(teams, data: ScrapeArgs) -> None:
-    teams_name_path = f"{data.league_dir}fbref_names.txt"
+def create_league_team_names_file(
+    teams: ResultSet[Tag],
+    data: ScrapeArgs
+) -> None:
+    # teams_name_path = f"{data.league_dir}fbref_names.txt"
+    teams_name_path = data.league_dir.joinpath("fbref_names.txt")
 
     if os.path.exists(teams_name_path):
         return 
     
-    team_names = [get_team_url(team, data, False)[1] for team in teams]
+    teams_info = [get_team_info(team, data, False) for team in teams]
+    team_names = [team_name for (team_url, team_name, team_id) in teams_info]
     team_names = sorted(team_names)
     file_content = "\n".join(team_names)
     with open(teams_name_path, "w") as f:
@@ -151,14 +172,19 @@ def create_league_team_names_file(teams, data: ScrapeArgs) -> None:
 
 
 
-def scrape_teams_data(driver, teams, data):
+def scrape_teams_data(
+    driver: WebDriver,
+    teams: ResultSet[Tag],
+    data: ScrapeArgs
+) -> None:
     for team in teams:
         
-        output = get_team_url(team, data, False)
-        if output is None:
+        team_info = get_team_info(team, data, False)
+
+        if team_info is None:
             continue
 
-        team_url, team_name, team_id = output
+        team_url, team_name, team_id = team_info
 
         team_data = ScrapeTeamArgs(
             team_name=team_name,
@@ -229,7 +255,7 @@ root_dir/
         opponents.csv
         goalkeepers.csv
 '''
-def get_league_data(data: ScrapeArgs) -> None:
+def get_fbref_league_data(data: ScrapeArgs) -> None:
 
 
     assert data.league_name in admissible_leagues, f"Not valid league name. Valid names are {admissible_leagues}"
